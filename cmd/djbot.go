@@ -31,8 +31,10 @@ func main() {
 	}
 	help := djbot.NewFamilyCommand("hsasds")
 	help.Commands["help"] = &tests{}
+	bb.ServerEnv.Load("ho.json")
+	bb.ServerEnv.Save("ho.json")
 	bb.CommandMannager.Commands["help"] = help
-	bb.MakeDefaultEnv("maxmsg", 200, stypes.TypeInt)
+
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc

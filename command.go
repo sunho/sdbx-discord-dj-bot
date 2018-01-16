@@ -37,16 +37,11 @@ func (cmd *FamilyCommand) Types() []stypes.Type {
 }
 
 func (cmd *FamilyCommand) Handle(sess *Session, parms []interface{}) {
-	s, _ := stypes.InterfacesToStrings(parms)
-	if cmd.Commands == nil {
-		fmt.Fprintln(sess.DJBot.Loggers, cmd, ".Commands", errormsg.Nil)
-		return
-	}
+	s := parms[0].([]string)
 	if len(s) == 0 {
-		sess.SendStr(errormsg.NotEnoughMinerals)
+		sess.SendStr(errormsg.NoSuchCommand)
 		return
 	}
-	fmt.Println(s[0])
 	if item, ok := cmd.Commands[s[0]]; ok {
 		ia, err := stypes.TypeConvertMany(s[1:], item.Types())
 		if err != nil {
@@ -75,11 +70,10 @@ func NewCommandManager(starter string) *CommandMannager {
 
 func (cm *CommandMannager) HandleMessage(s *Session, msg *discordgo.MessageCreate) {
 	if len(cm.Starter) != 0 {
-		fmt.Fprintln(s.DJBot.Loggers, errormsg.NoStarter)
 		str := []rune(msg.Content)
 		if string(str[0:len(cm.Starter)]) == cm.Starter {
 			pstr := string(str[len(cm.Starter):])
-			m, err := s.DJBot.GetEnv(s.ServerID, "maxmsg")
+			m, err := s.DJBot.ServerEnv.GetOwner(s.ServerID).GetEnv("maxmsg")
 			if err != nil {
 				s.SendStr(err.Error())
 				return
@@ -88,8 +82,7 @@ func (cm *CommandMannager) HandleMessage(s *Session, msg *discordgo.MessageCreat
 				s.SendStr(errormsg.NoJustATrick)
 			}
 			arr := strings.Split(pstr, " ")
-			sa, _ := stypes.StringsToInterfaces(arr)
-			cm.Handle(s, sa)
+			cm.Handle(s, []interface{}{arr})
 		}
 	} else {
 		fmt.Fprintln(s.DJBot.Loggers, errormsg.NoStarter)

@@ -2,8 +2,9 @@ package stypes
 
 import (
 	"errors"
-	"fmt"
+	"reflect"
 	"strconv"
+	"strings"
 
 	"github.com/ksunhokim123/sdbx-discord-dj-bot/errormsg"
 )
@@ -15,9 +16,23 @@ const (
 	TypeString
 	TypeRange
 	TypeStrings
+	TypeOther
 )
 
 type Range struct {
+}
+
+func GetType(in interface{}) Type {
+	switch in.(type) {
+	case int:
+		return TypeInt
+	case string:
+		return TypeString
+	case []string:
+		return TypeStrings
+	default:
+		return TypeOther
+	}
 }
 
 func InterfacesToStrings(slice []interface{}) ([]string, error) {
@@ -41,11 +56,18 @@ func StringsToInterfaces(slice []string) ([]interface{}, error) {
 }
 
 func TypeConvertOne(str string, t Type) (interface{}, error) {
-	s := []string{str}
+	s := strings.Split(str, ",")
 	return typeConvertOne(s, t)
 }
 
 func typeConvertOne(nstr []string, t Type) (interface{}, error) {
+	//exception for commandmanager
+	if len(nstr) == 0 {
+		if t == TypeStrings {
+			return []string{}, nil
+		}
+		return nil, errors.New(errormsg.NotEnoughMinerals)
+	}
 	switch t {
 	case TypeString:
 		return nstr[0], nil
@@ -56,8 +78,7 @@ func typeConvertOne(nstr []string, t Type) (interface{}, error) {
 		}
 		return i, nil
 	case TypeStrings:
-		ia2, _ := StringsToInterfaces(nstr)
-		return ia2, errors.New("strings") //TODO: do something better
+		return nstr, nil
 	default:
 		return nil, errors.New(errormsg.UndefinedType)
 	}
@@ -67,23 +88,18 @@ func TypeConvertMany(strs []string, types []Type) ([]interface{}, error) {
 	if len(types) == 0 {
 		return []interface{}{}, nil
 	}
-	fmt.Println(strs)
 	nstrs := strs
 	ia := []interface{}{}
 	for _, t := range types {
-		if len(nstrs) == 0 {
-			return nil, errors.New(errormsg.NotEnoughMinerals)
-		}
 		i, err := typeConvertOne(nstrs, t)
 		if err != nil {
-			if err.Error() == "strings" {
-				ia = append(ia, i.([]interface{})...)
-				return ia, nil
-			} else {
-				return nil, err
-			}
+			return nil, err
 		}
 		ia = append(ia, i)
+		//TODO do something better
+		if reflect.TypeOf(i) == reflect.TypeOf([]string{}) {
+			return ia, nil
+		}
 		nstrs = nstrs[1:]
 	}
 	if len(types) == len(strs) {

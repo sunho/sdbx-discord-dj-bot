@@ -12,6 +12,7 @@ type Session struct {
 	ServerID  string
 	DJBot     *DJBot
 	Msg       *discordgo.MessageCreate
+	UserEnv   map[string]EnvVar
 }
 
 func (sess *Session) GetLoggers() io.Writer {
