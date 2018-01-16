@@ -1,31 +1,30 @@
 package djbot
 
 import (
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-const GoodToken = ""
-const GoodId = ""
-const GoodPw = ""
+const GoodToken = "NDAyNDkwNTM0OTkzNzIzMzky.DT_JQw.nZSQxUhUBDi6W-orIuqN2JvvJwI"
 
 func TestConstants(t *testing.T) {
 	assert.NotEmpty(t, GoodToken, "goodtoken is empty")
-	assert.NotEmpty(t, GoodPw, "goodid is empty")
-	assert.NotEmpty(t, GoodId, "goodpw is empty")
 }
-func TestBotBase(t *testing.T) {
-	botbase, err := BotBase.NewBot("token")
-	assert.Nil(t, err, "botbase made with wrong token should return error")
-	assert.NotNil(t, botbase, "wrongly initiallized botbase should be nil")
-	botbase, err = BotBase.NewBot(GoodToken)
-	assert.NotNil(t, err, "botbase made with good token shold not return error")
+func TestCreation(t *testing.T) {
+	botbase, err := NewFromToken("token", "!!", os.Stdout)
+	assert.NotNil(t, err, "DJ made with wrong token should return error")
+	assert.Nil(t, botbase, "wrongly initiallized DJ should be nil")
+	botbase, err = NewFromToken(GoodToken, "!!", os.Stdout)
+	assert.Nil(t, err, "DJ made with good token shold not return error")
 	botbase.Close()
+	assert.Nil(t, err, "closed DJ must be nil")
 }
 
-func TestBotBaseAddCommand(t *testing.T) {
-	botbase, err := BotBase.NewBot(GoodToken)
-	cmd := Command.New("test")
-	botbase.AddCommand()
+func TestHandler(t *testing.T) {
+	botbase, err := NewFromToken(GoodToken, "!!", os.Stdout)
+	assert.Nil(t, err, "DJ made with good token shold not return error")
+	botbase.HandleNewMessage(nil, nil)
+
 }

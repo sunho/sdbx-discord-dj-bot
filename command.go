@@ -28,14 +28,6 @@ func NewFamilyCommand(description string) *FamilyCommand {
 	}
 }
 
-func (cmd *FamilyCommand) Description() string {
-	return cmd.CustomDescription
-}
-
-func (cmd *FamilyCommand) Types() []stypes.Type {
-	return []stypes.Type{stypes.TypeStrings}
-}
-
 func (cmd *FamilyCommand) Handle(sess *Session, parms []interface{}) {
 	s := parms[0].([]string)
 	if len(s) == 0 {
@@ -53,6 +45,14 @@ func (cmd *FamilyCommand) Handle(sess *Session, parms []interface{}) {
 	} else {
 		sess.SendStr(errormsg.NoSuchCommand)
 	}
+}
+
+func (cmd *FamilyCommand) Description() string {
+	return cmd.CustomDescription
+}
+
+func (cmd *FamilyCommand) Types() []stypes.Type {
+	return []stypes.Type{stypes.TypeStrings}
 }
 
 type CommandMannager struct {

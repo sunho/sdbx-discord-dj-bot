@@ -14,8 +14,8 @@ type Type int
 const (
 	TypeInt Type = iota
 	TypeString
-	TypeRange
 	TypeStrings
+	TypeRange
 	TypeOther
 )
 
@@ -30,29 +30,11 @@ func GetType(in interface{}) Type {
 		return TypeString
 	case []string:
 		return TypeStrings
+	case Range:
+		return TypeRange
 	default:
 		return TypeOther
 	}
-}
-
-func InterfacesToStrings(slice []interface{}) ([]string, error) {
-	sa := []string{}
-	for _, i := range slice {
-		if s, ok := i.(string); ok {
-			sa = append(sa, s)
-		} else {
-			return nil, errors.New(errormsg.NoString)
-		}
-	}
-	return sa, nil
-}
-
-func StringsToInterfaces(slice []string) ([]interface{}, error) {
-	ia := []interface{}{}
-	for _, s := range slice {
-		ia = append(ia, s)
-	}
-	return ia, nil
 }
 
 func TypeConvertOne(str string, t Type) (interface{}, error) {
@@ -69,14 +51,14 @@ func typeConvertOne(nstr []string, t Type) (interface{}, error) {
 		return nil, errors.New(errormsg.NotEnoughMinerals)
 	}
 	switch t {
-	case TypeString:
-		return nstr[0], nil
 	case TypeInt:
 		i, err := strconv.Atoi(nstr[0])
 		if err != nil {
 			return nil, errors.New(errormsg.ConvertingError)
 		}
 		return i, nil
+	case TypeString:
+		return nstr[0], nil
 	case TypeStrings:
 		return nstr, nil
 	default:
@@ -85,8 +67,9 @@ func typeConvertOne(nstr []string, t Type) (interface{}, error) {
 }
 
 func TypeConvertMany(strs []string, types []Type) ([]interface{}, error) {
+	//void commands
 	if len(types) == 0 {
-		return []interface{}{}, nil
+		return nil, nil
 	}
 	nstrs := strs
 	ia := []interface{}{}
@@ -97,6 +80,7 @@ func TypeConvertMany(strs []string, types []Type) ([]interface{}, error) {
 		}
 		ia = append(ia, i)
 		//TODO do something better
+		//strings
 		if reflect.TypeOf(i) == reflect.TypeOf([]string{}) {
 			return ia, nil
 		}

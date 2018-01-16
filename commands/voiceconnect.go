@@ -15,8 +15,8 @@ func (vc *VoiceConnect) Handle(sess *djbot.Session, parms []interface{}) {
 	dlist := []interface{}{}
 	for _, ch := range gd.Channels {
 		if ch.Type == discordgo.ChannelTypeGuildVoice {
-			slist = append(slist, ch.Name)
 			dlist = append(dlist, ch.ID)
+			slist = append(slist, ch.Name)
 		}
 	}
 	sess.DJBot.RequestManager.Set(sess, &djbot.Request{

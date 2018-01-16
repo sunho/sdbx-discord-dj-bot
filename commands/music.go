@@ -3,7 +3,6 @@ package commands
 import (
 	"bufio"
 	"encoding/binary"
-	"fmt"
 	"io"
 	"os/exec"
 
@@ -77,9 +76,7 @@ type MusicPlay struct {
 
 //TODO: replcae this into better one
 func (mc *MusicPlay) Handle(sess *djbot.Session, parms []interface{}) {
-	fmt.Println("ASD")
 	if sess.VoiceConnection != nil {
-		fmt.Println("ASD")
 		mc.Music.InitializeServer(sess.ServerID)
 		ms := mc.Music.Servers[sess.ServerID]
 		for len(ms.Song) != 0 {

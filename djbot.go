@@ -43,3 +43,8 @@ func NewFromToken(token string, starter string, logger io.Writer) (*DJBot, error
 	bb.Discord = dg
 	return bb, nil
 }
+
+func (base *DJBot) Close() {
+	base.Discord.Close()
+	base = nil
+}

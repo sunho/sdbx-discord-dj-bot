@@ -7,6 +7,9 @@ import (
 )
 
 func (base *DJBot) HandleNewMessage(s *discordgo.Session, msg *discordgo.MessageCreate) {
+	if s == nil || msg == nil {
+		return
+	}
 	ch, err := s.Channel(msg.ChannelID)
 	if err != nil {
 		fmt.Println("s.Channel(msg.ChannelID) something is wrong definitely:", err)
