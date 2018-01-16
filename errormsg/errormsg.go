@@ -1,6 +1,7 @@
 package errormsg
 
-var (
+//TODO incorporate with msgs
+const (
 	NoJustATrick      = ":eyes: No prank!"
 	NoStarter         = "There's no starter"
 	NotEnoughMinerals = ":x::moneybag: Not enough parameters."
@@ -12,4 +13,5 @@ var (
 	UndefinedType     = "undefined type"
 	NoTypes           = "no entered type"
 	ConvertingError   = "converting error!"
+	NotMatchedParms   = "the number of parmeters don't match."
 )

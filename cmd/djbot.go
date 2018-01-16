@@ -1,6 +1,8 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"os"
 	"os/signal"
 	"strconv"
@@ -24,10 +26,18 @@ func (t *tests) Description() string {
 func (tests *tests) Types() []stypes.Type {
 	return []stypes.Type{stypes.TypeInt}
 }
-func main() {
-	bb, err := djbot.NewFromToken("NDAyNDkwNTM0OTkzNzIzMzky.DT5lSg.dU7gVMvcFrAAvPjl--QzK1ayCYs", "!!", os.Stdout)
-	if err != nil {
 
+var token string
+
+func init() {
+	flag.StringVar(&token, "token", "default", "bot secret token")
+	flag.Parse()
+}
+func main() {
+	bb, err := djbot.NewFromToken(token, "!!", os.Stdout)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
 	}
 	help := djbot.NewFamilyCommand("hsasds")
 	help.Commands["help"] = &tests{}

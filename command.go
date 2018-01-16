@@ -73,13 +73,14 @@ func (cm *CommandMannager) HandleMessage(s *Session, msg *discordgo.MessageCreat
 		str := []rune(msg.Content)
 		if string(str[0:len(cm.Starter)]) == cm.Starter {
 			pstr := string(str[len(cm.Starter):])
-			m, err := s.DJBot.ServerEnv.GetOwner(s.ServerID).GetEnv("maxmsg")
+			m, err := s.GetServerOwner().GetEnv("maxmsg")
 			if err != nil {
 				s.SendStr(err.Error())
 				return
 			}
 			if len(str) >= m.(int) {
 				s.SendStr(errormsg.NoJustATrick)
+				return
 			}
 			arr := strings.Split(pstr, " ")
 			cm.Handle(s, []interface{}{arr})

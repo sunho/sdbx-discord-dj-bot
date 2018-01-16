@@ -64,7 +64,7 @@ func typeConvertOne(nstr []string, t Type) (interface{}, error) {
 	//exception for commandmanager
 	if len(nstr) == 0 {
 		if t == TypeStrings {
-			return []string{}, nil
+			return []string{""}, nil
 		}
 		return nil, errors.New(errormsg.NotEnoughMinerals)
 	}

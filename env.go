@@ -3,7 +3,6 @@ package djbot
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 
 	"github.com/ksunhokim123/sdbx-discord-dj-bot/errormsg"
@@ -49,17 +48,16 @@ func (base EnvManager) Save(filename string) error {
 }
 
 //TODO? change this into io.writer
-func (base *EnvManager) Load(filename string) {
+func (base *EnvManager) Load(filename string) error {
 	bytes, err := ioutil.ReadFile(filename)
 	if err != nil {
-		fmt.Println("error occured while loading")
-		return
+		return err
 	}
 	err = json.Unmarshal(bytes, base)
 	if err != nil {
-		fmt.Println("error occured while loading")
-		return
+		return err
 	}
+	return nil
 }
 func (base *EnvManager) updateEnv() {
 	defaultow := base.Owner["default"]
@@ -90,9 +88,6 @@ func (base *EnvManager) copyDefaultEnv(owner string) {
 }
 
 func (base *EnvOwner) GetEnv(key string) (interface{}, error) {
-	/*if _, ok := base[owner]; !ok {
-		base.copyDefaultEnv(owner)
-	}*/
 	sar := interface{}(nil)
 	if env, ok := base.Env[key]; ok {
 		sar = env.Var

@@ -1,7 +1,6 @@
 package djbot
 
 import (
-	"fmt"
 	"io"
 
 	"github.com/bwmarrin/discordgo"
@@ -14,6 +13,7 @@ type DJBot struct {
 	ServerEnv        EnvManager
 	VoiceConnections map[string]*discordgo.VoiceConnection
 	Discord          *discordgo.Session
+	RequestManager   *RequestManager
 }
 
 func NewFromToken(token string, starter string, logger io.Writer) (*DJBot, error) {
@@ -26,40 +26,20 @@ func NewFromToken(token string, starter string, logger io.Writer) (*DJBot, error
 	}
 	bb.ServerEnv.Owner["default"] = &EnvOwner{make(map[string]EnvVar)}
 	bb.UserEnv.Owner["default"] = &EnvOwner{make(map[string]EnvVar)}
+	bb.RequestManager = &RequestManager{
+		Requests: make(map[string]*Request),
+	}
+
 	dg, err := discordgo.New("Bot " + token)
 	if err != nil {
 		return nil, err
 	}
 	dg.AddHandler(bb.HandleNewMessage)
+
 	err = dg.Open()
 	if err != nil {
 		return nil, err
 	}
 	bb.Discord = dg
 	return bb, nil
-}
-
-func (base *DJBot) HandleNewMessage(s *discordgo.Session, msg *discordgo.MessageCreate) {
-	ch, err := s.Channel(msg.ChannelID)
-	if err != nil {
-		fmt.Println("s.Channel(msg.ChannelID) something is wrong definitely:", err)
-		return
-	}
-	var sess = &Session{
-		Session:   s,
-		ChannelID: msg.ChannelID,
-		ServerID:  ch.GuildID,
-		DJBot:     base,
-		Msg:       msg,
-	}
-	if len(msg.Embeds) != 0 {
-
-	}
-	if len(msg.Attachments) == 0 {
-
-	}
-	if len(msg.Content) != 0 {
-		/*go*/ base.CommandMannager.HandleMessage(sess, msg) // discord go already goed this (go eh.eventHandler.Handle(s, i))
-	}
-
 }
