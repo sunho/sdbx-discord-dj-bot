@@ -22,16 +22,24 @@ func TimeOutMsg(sess *discordgo.Session, chID string, msgID string, t time.Durat
 	go timeOutMsg(sess, chID, msgID, t)
 }
 
-func ListMsg(list []string, sess *discordgo.Session, channel string) chan bool {
+func ListMsg(list []string, userid string, channel string, sess *discordgo.Session) chan bool {
+	usr, _ := sess.User(userid)
 	p := dgwidgets.NewPaginator(sess, channel)
 	for i := 0; i < len(list); i += 10 {
 		str := ""
 		for j := 0; j < utils.MinInt(10, len(list)-i); j++ {
-			str += fmt.Sprintln(i+j, " "+list[i+j])
+			str += fmt.Sprintln(i+j, " ", list[i+j])
 		}
-		p.Add(&discordgo.MessageEmbed{Description: str, Color: 0xffff00})
+		p.Add(&discordgo.MessageEmbed{
+			Description: str,
+			Color:       0xffff00,
+			Footer: &discordgo.MessageEmbedFooter{
+				IconURL: usr.AvatarURL(""),
+				Text: usr.Username + "\n" +
+					"Page " + strconv.Itoa(i/10+1),
+			},
+		})
 	}
-	p.SetPageFooters()
 	p.Widget.Timeout = time.Second * 20
 	p.ColourWhenDone = 0xfffff0
 	go p.Spawn()
@@ -52,7 +60,8 @@ func (list CmdList) Less(i, j int) bool {
 	return list[i][0] < list[j][0]
 }
 
-func HelpMsg(list CmdList, sess *discordgo.Session, channel string) {
+func HelpMsg(list CmdList, userid string, channel string, sess *discordgo.Session) {
+	usr, _ := sess.User(userid)
 	sort.Sort(list)
 	fields := []*discordgo.MessageEmbedField{}
 	for i := 0; i < len(list); i++ {
@@ -65,9 +74,39 @@ func HelpMsg(list CmdList, sess *discordgo.Session, channel string) {
 		Title:  "Commands list",
 		Fields: fields,
 		Color:  0xffff00,
+		Footer: &discordgo.MessageEmbedFooter{
+			IconURL: usr.AvatarURL(""),
+			Text:    usr.Username,
+		},
 	}
 	sess.ChannelMessageSendEmbed(channel, eb)
 }
+
+func EnvMsg(list CmdList, userid string, channel string, sess *discordgo.Session) {
+	usr, _ := sess.User(userid)
+	sort.Sort(list)
+	fields := []*discordgo.MessageEmbedField{}
+	for i := 0; i < len(list); i++ {
+		if list[i][1] == "" {
+			list[i][1] = "nil"
+		}
+		fields = append(fields, &discordgo.MessageEmbedField{
+			Name:  list[i][0],
+			Value: list[i][1],
+		})
+	}
+	eb := &discordgo.MessageEmbed{
+		Title:  "Env list",
+		Fields: fields,
+		Color:  0xffff00,
+		Footer: &discordgo.MessageEmbedFooter{
+			IconURL: usr.AvatarURL(""),
+			Text:    usr.Username,
+		},
+	}
+	sess.ChannelMessageSendEmbed(channel, eb)
+}
+
 func AddedToQueue(song []string, position int, userid string, channel string, sess *discordgo.Session) {
 	usr, _ := sess.User(userid)
 	eb := &discordgo.MessageEmbed{

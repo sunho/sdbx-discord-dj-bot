@@ -16,7 +16,6 @@ type Command interface {
 	Types() []stypes.Type
 }
 
-// TODO assert duplication
 type FamilyCommand struct {
 	Commands          map[string]Command
 	CustomDescription string
@@ -31,7 +30,7 @@ func (h *help) Handle(sess *Session, parms []interface{}) {
 	for i, cmd := range h.fc.Commands {
 		str = append(str, []string{i, cmd.Description()})
 	}
-	msg.HelpMsg(str, sess.Session, sess.ChannelID)
+	msg.HelpMsg(str, sess.UserID, sess.ChannelID, sess.Session)
 }
 
 func (h *help) Description() string {

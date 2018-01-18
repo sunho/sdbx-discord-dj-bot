@@ -10,7 +10,11 @@ type EnvSet struct {
 }
 
 func (es *EnvSet) Handle(sess *djbot.Session, parms []interface{}) {
-	err := sess.GetServerOwner().SetEnvWithStr(parms[0].(string), parms[1].(string))
+	vars := parms[1].(string)
+	if vars == "nil" {
+		vars = ""
+	}
+	err := sess.GetServerOwner().SetEnvWithStr(parms[0].(string), vars)
 	if err != nil {
 		sess.SendStr(err.Error())
 	}

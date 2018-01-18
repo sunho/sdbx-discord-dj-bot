@@ -1,8 +1,6 @@
 package djbot
 
 import (
-	"fmt"
-
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -10,11 +8,10 @@ func (base *DJBot) HandleNewMessage(s *discordgo.Session, msg2 *discordgo.Messag
 	if msg2.Author.ID == s.State.User.ID {
 		return
 	}
-	ch, err := s.Channel(msg2.ChannelID)
-	if err != nil {
-		fmt.Println("s.Channel(msg.ChannelID) something is wrong definitely:", err)
+	if ch, _ := s.Channel(msg2.ChannelID); ch.Type != discordgo.ChannelTypeGuildText {
 		return
 	}
+	ch, _ := s.Channel(msg2.ChannelID)
 	var sess = &Session{
 		Session:   s,
 		ChannelID: msg2.ChannelID,
@@ -29,6 +26,8 @@ func (base *DJBot) HandleNewMessage(s *discordgo.Session, msg2 *discordgo.Messag
 	if len(msg2.Content) != 0 {
 		/*go*/ base.CommandMannager.HandleMessage(sess, msg2) // discord go already goed this (go eh.eventHandler.Handle(s, i))
 		/*go*/ base.RequestManager.HandleMessage(sess, msg2)
+		HandleDynoMessage(s, msg2)
+		HandleRhythmMessage(s, msg2)
 	}
 
 }

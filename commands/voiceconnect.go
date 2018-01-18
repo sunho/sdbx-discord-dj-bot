@@ -3,6 +3,7 @@ package commands
 import (
 	"github.com/bwmarrin/discordgo"
 	djbot "github.com/ksunhokim123/sdbx-discord-dj-bot"
+	"github.com/ksunhokim123/sdbx-discord-dj-bot/envs"
 	"github.com/ksunhokim123/sdbx-discord-dj-bot/msg"
 	"github.com/ksunhokim123/sdbx-discord-dj-bot/stypes"
 )
@@ -11,6 +12,13 @@ type VoiceConnect struct {
 }
 
 func (vc *VoiceConnect) Handle(sess *djbot.Session, parms []interface{}) {
+	if only, _ := sess.GetServerOwner().GetEnv(envs.CHANNELONLY); only.(bool) {
+		channel, err := sess.GetServerOwner().GetEnv("Channel")
+		if err == nil {
+			vc.Connect(sess, channel)
+			return
+		}
+	}
 	gd, _ := sess.Guild(sess.ServerID)
 	slist := []string{}
 	dlist := []interface{}{}
@@ -29,6 +37,15 @@ func (vc *VoiceConnect) Handle(sess *djbot.Session, parms []interface{}) {
 func (vc *VoiceConnect) Connect(sess *djbot.Session, id interface{}) {
 	id2, ok := id.(string)
 	if ok {
+		ch, err := sess.Channel(id.(string))
+		if err != nil {
+			sess.SendStr(msg.NoJustATrick)
+			return
+		}
+		if ch.Type != discordgo.ChannelTypeGuildVoice {
+			sess.SendStr(msg.NoJustATrick)
+			return
+		}
 		vc, err := sess.ChannelVoiceJoin(sess.ServerID, id2, false, true)
 		if err != nil {
 			sess.SendStr(msg.NoJustATrick)

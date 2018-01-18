@@ -13,13 +13,19 @@ type MusicQueue struct {
 //TODO: replcae this into better one
 func (mc *MusicQueue) Handle(sess *djbot.Session, parms []interface{}) {
 	d := []string{}
-	for _, ss := range mc.Music.GetServer(sess.ServerID).Songs {
-		d = append(d, ss.Name+"	"+ss.Url)
+
+	songs := mc.Music.GetServer(sess.ServerID).Songs
+	for i := 0; i < len(songs); i++ {
+		usr, _ := sess.User(songs[i].Requester)
+		d = append(d, "`"+songs[i].Name+"`  **"+songs[i].Duration.String()+"**  Requested by "+usr.Username)
 	}
+	msg.ListMsg(d, sess.UserID, sess.ChannelID, sess.Session)
 }
+
 func (vc *MusicQueue) Description() string {
 	return msg.DescriptionMusicQueue
 }
+
 func (vc *MusicQueue) Types() []stypes.Type {
 	return []stypes.Type{}
 }
