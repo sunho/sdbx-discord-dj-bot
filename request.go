@@ -43,7 +43,6 @@ func (mgr *RequestManager) Set(s *Session, r *Request) {
 		s.SendStr(msg.NotMatchedParms)
 		return
 	}
-	ch := msg.ListMsg(r.List, s.UserID, s.ChannelID, s.Session)
-	r.Close = ch
+	msg.ListMsg(r.List, s.UserID, s.ChannelID, s.Session)
 	mgr.Requests[s.UserID] = r
 }

@@ -14,7 +14,7 @@ func (es *EnvSet) Handle(sess *djbot.Session, parms []interface{}) {
 	if vars == "nil" {
 		vars = ""
 	}
-	err := sess.GetServerOwner().SetEnvWithStr(parms[0].(string), vars)
+	err := sess.GetEnvServer().SetEnvWithStr(parms[0].(string), vars)
 	if err != nil {
 		sess.SendStr(err.Error())
 	}

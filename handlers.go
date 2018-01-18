@@ -26,8 +26,6 @@ func (base *DJBot) HandleNewMessage(s *discordgo.Session, msg2 *discordgo.Messag
 	if len(msg2.Content) != 0 {
 		/*go*/ base.CommandMannager.HandleMessage(sess, msg2) // discord go already goed this (go eh.eventHandler.Handle(s, i))
 		/*go*/ base.RequestManager.HandleMessage(sess, msg2)
-		HandleDynoMessage(s, msg2)
-		HandleRhythmMessage(s, msg2)
 	}
 
 }

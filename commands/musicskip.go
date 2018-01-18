@@ -39,7 +39,7 @@ func (m *MusicServer) SkipVote(sess *djbot.Session, recipentn int) bool {
 	defer func() {
 		m.Unlock()
 	}()
-	option, err := sess.GetServerOwner().GetEnv(envs.SKIPVOTE)
+	option, err := sess.GetEnvServer().GetEnv(envs.SKIPVOTE)
 	if err != nil {
 		option = false
 	}

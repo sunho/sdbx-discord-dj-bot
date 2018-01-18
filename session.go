@@ -2,9 +2,6 @@ package djbot
 
 import (
 	"fmt"
-	"io"
-
-	"github.com/ksunhokim123/sdbx-discord-dj-bot/msg"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -13,6 +10,7 @@ type Session struct {
 	*discordgo.Session
 	ChannelID       string
 	ServerID        string
+	UserName        string
 	VoiceConnection *discordgo.VoiceConnection
 	DJBot           *DJBot
 	UserID          string
@@ -20,24 +18,19 @@ type Session struct {
 	UserEnv         map[string]EnvVar
 }
 
-func (sess *Session) GetLoggers() io.Writer {
-	return sess.DJBot.Loggers
-}
-
-func (sess *Session) GetServerOwner() *EnvOwner {
-	return sess.DJBot.ServerEnv.GetOwner(sess.ServerID)
-}
-
-func (sess *Session) GetUserOwner(name string) *EnvOwner {
-	return sess.DJBot.UserEnv.GetOwner(name)
+func (sess *Session) GetEnvServer() *EnvServer {
+	return sess.DJBot.EnvManager.GetServer(sess.ServerID)
 }
 
 func (sess *Session) SendStr(str string) {
 	_, err := sess.ChannelMessageSend(sess.ChannelID, str)
 	if err != nil {
-		fmt.Fprintln(sess.DJBot.Loggers, msg.NoJustATrick)
 		return
 	}
+}
+
+func (sess *Session) Send(args ...interface{}) {
+	sess.SendStr(fmt.Sprint(args))
 }
 
 func (sess *Session) GetPermission() int {
@@ -48,8 +41,4 @@ func (sess *Session) GetPermission() int {
 func (sess *Session) GetRoles() []string {
 	gm, _ := sess.GuildMember(sess.ServerID, sess.UserID)
 	return gm.Roles
-}
-
-func (sess *Session) Log(args ...interface{}) {
-	fmt.Fprintln(sess.DJBot.Loggers, args...)
 }

@@ -75,7 +75,7 @@ func MakeService(sess *djbot.Session) (*youtube.Service, error) {
 	}
 	service, err := youtube.New(client)
 	if err != nil {
-		sess.Log("youtube err", err)
+		sess.Send("youtube err", err)
 		return nil, errors.New(msg.NoJustATrick)
 	}
 	return service, nil
@@ -84,14 +84,14 @@ func MakeService(sess *djbot.Session) (*youtube.Service, error) {
 func GetSong(sess *djbot.Session, ID string) *Song {
 	service, err := MakeService(sess)
 	if err != nil {
-		sess.Log("youtube err", err)
+		sess.Send("youtube err", err)
 		return nil
 	}
 	call := service.Videos.List("id,snippet,contentDetails")
 	call = call.Id(ID)
 	response, err := call.Do()
 	if err != nil {
-		sess.Log("youtube err", err)
+		sess.Send("youtube err", err)
 		return nil
 	}
 	if len(response.Items) != 1 {

@@ -3,7 +3,6 @@ package djbot
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 
 	"github.com/ksunhokim123/sdbx-discord-dj-bot/msg"
@@ -15,141 +14,122 @@ func e(str string) error {
 }
 
 type EnvVar struct {
-	Var     interface{}
-	Type    stypes.Type
-	ForUser bool
+	Var  interface{}
+	Type stypes.Type
 }
 
-type EnvOwner struct {
+type EnvServer struct {
 	Env map[string]EnvVar
+	ID  string
 }
 
 type EnvManager struct {
-	Owner           map[string]*EnvOwner
+	Servers         map[string]*EnvServer
 	UpdateFunctions []func()
 }
 
-func (base *EnvManager) GetOwner(owner string) *EnvOwner {
-	if _, ok := base.Owner[owner]; !ok {
-		base.copyDefaultEnv(owner)
+func (envm *EnvManager) GetServer(serverID string) *EnvServer {
+	if _, ok := envm.Servers[serverID]; !ok {
+		envm.copyDefaultEnv(serverID)
 	}
-	return base.Owner[owner]
+	return envm.Servers[serverID]
 }
 
-func marshelJson(i interface{}, filename string) error {
-	saveJson, _ := json.Marshal(i)
-	err := ioutil.WriteFile(filename, saveJson, 0644)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-//TODO? change this into io.writer
-func (base EnvManager) Save(filename string) error {
-	for _, f := range base.UpdateFunctions {
+func (envm EnvManager) Save(filename string) {
+	for _, f := range envm.UpdateFunctions {
 		f()
 	}
-	saveJson, _ := json.Marshal(base)
-	err := ioutil.WriteFile(filename, saveJson, 0644)
+	bytes, err := json.Marshal(envm)
 	if err != nil {
-		return err
+		return
 	}
-	return nil
+	err = ioutil.WriteFile(filename, bytes, 0644)
+	if err != nil {
+		return
+	}
 }
 
-//TODO? change this into io.writer
-func (base *EnvManager) Load(filename string) error {
+func (envm *EnvManager) Load(filename string) {
 	bytes, err := ioutil.ReadFile(filename)
 	if err != nil {
-		return err
+		return
 	}
-	err = json.Unmarshal(bytes, base)
+	err = json.Unmarshal(bytes, envm)
 	if err != nil {
-		return err
+		return
 	}
-	return nil
 }
 
-func (base *EnvManager) Update() {
-	defaultow := base.Owner["default"]
-	for _, owner := range base.Owner {
-		for key := range owner.Env {
+func (envm *EnvManager) Update() {
+	defaultserver := envm.Servers["default"]
+	for _, server := range envm.Servers {
+		for key := range server.Env {
 			//delete old env
-			if _, ok := defaultow.Env[key]; !ok {
-				delete(owner.Env, key)
+			if _, ok := defaultserver.Env[key]; !ok {
+				delete(server.Env, key)
 			}
 		}
-		for key := range defaultow.Env {
-			//update new env
-			if _, ok := owner.Env[key]; !ok {
-				owner.Env[key] = defaultow.Env[key]
+		for key := range defaultserver.Env {
+			//add new env
+			if _, ok := server.Env[key]; !ok {
+				server.Env[key] = defaultserver.Env[key]
 			}
 			//update new type
-			if owner.Env[key].Type != defaultow.Env[key].Type {
-				owner.Env[key] = defaultow.Env[key]
+			if server.Env[key].Type != defaultserver.Env[key].Type {
+				server.Env[key] = defaultserver.Env[key]
 			}
 		}
 	}
 }
 
-func (base *EnvManager) copyDefaultEnv(owner string) {
-	base.Owner[owner] = &EnvOwner{make(map[string]EnvVar)}
-	for key, iter := range base.Owner["default"].Env {
-		base.Owner[owner].Env[key] = iter
+func (envm *EnvManager) copyDefaultEnv(serverID string) {
+	envm.Servers[serverID] = &EnvServer{make(map[string]EnvVar), serverID}
+	for key, env := range envm.Servers["default"].Env {
+		envm.Servers[serverID].Env[key] = env
 	}
 }
 
-func (base *EnvOwner) GetEnv(key string) (interface{}, error) {
-	if env, ok := base.Env[key]; ok {
+func (envs *EnvServer) GetEnv(key string) (interface{}, error) {
+	if env, ok := envs.Env[key]; ok {
 		return env.Var, nil
 	}
-	fmt.Println(key + msg.Nil)
 	return nil, e(msg.AcessUndefinedEnv)
 }
 
-func (base *EnvManager) MakeDefaultEnv(key string, i interface{}, foruser bool) error {
-	defaultow := base.Owner["default"]
-	t := stypes.GetType(i)
-	if t == stypes.TypeOther {
-		return e(msg.ConvertingError)
+func (envm *EnvManager) MakeDefaultEnv(key string, value interface{}) {
+	defaultserver := envm.Servers["default"]
+	typ := stypes.GetType(value)
+	if typ == stypes.TypeOther {
+		return
 	}
-	defaultow.Env[key] = EnvVar{i, t, foruser}
-	return nil
+	defaultserver.Env[key] = EnvVar{value, typ}
 }
 
-// only for users
-func (base *EnvOwner) SetEnvWithStr(key string, value string) error {
-	if env, ok := base.Env[key]; ok {
-		i, err := stypes.TypeConvertOne(value, env.Type)
+func (envs *EnvServer) SetEnvWithStr(key string, value string) error {
+	if env, ok := envs.Env[key]; ok {
+		convvalue, err := stypes.TypeConvertOne(value, env.Type)
 		if err != nil {
 			return err
 		}
-		base.Env[key] = EnvVar{i, env.Type, true}
+		envs.Env[key] = EnvVar{convvalue, env.Type}
+		return nil
+	}
+
+	return e(msg.AcessUndefinedEnv)
+}
+
+func (envs *EnvServer) SetEnvWithInterface(key string, value interface{}) error {
+	if env, ok := envs.Env[key]; ok {
+		if stypes.GetType(value) == env.Type {
+			envs.Env[key] = EnvVar{value, env.Type}
+		} else {
+			return e(msg.TypesDontMatch)
+		}
 		return nil
 	}
 	return e(msg.AcessUndefinedEnv)
 }
 
-func (base *EnvOwner) SetEnvWithInterface(key string, in interface{}) error {
-	if env, ok := base.Env[key]; ok {
-		if stypes.GetType(in) == env.Type {
-			base.Env[key] = EnvVar{in, env.Type, env.ForUser}
-		} else {
-			return e(msg.ConvertingError)
-		}
-		return nil
-	}
-	if t := stypes.GetType(in); t != stypes.TypeOther {
-		base.Env[key] = EnvVar{in, t, false}
-		return nil
-	}
-	return e(msg.NoSupportOther)
-}
-
 func NewEnvManager() EnvManager {
-	return EnvManager{make(map[string]*EnvOwner), []func(){}}
-}
-func (base *EnvOwner) DeleteEnv(key string) {
-	delete(base.Env, key)
+	return EnvManager{make(map[string]*EnvServer), []func(){}}
 }

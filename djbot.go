@@ -1,32 +1,25 @@
 package djbot
 
 import (
-	"io"
-
 	"github.com/bwmarrin/discordgo"
 )
 
 type DJBot struct {
 	CommandMannager  *CommandMannager
-	Loggers          io.Writer
-	UserEnv          EnvManager //TODO: make independent one
-	ServerEnv        EnvManager
+	EnvManager       EnvManager
 	VoiceConnections map[string]*discordgo.VoiceConnection
 	YoutubeToken     string
 	Discord          *discordgo.Session
 	RequestManager   *RequestManager
 }
 
-func NewFromToken(token string, starter string, logger io.Writer) (*DJBot, error) {
+func NewFromToken(token string, starter string) (*DJBot, error) {
 	bb := &DJBot{
 		CommandMannager:  NewCommandManager(starter),
-		UserEnv:          NewEnvManager(),
-		ServerEnv:        NewEnvManager(),
-		Loggers:          logger,
+		EnvManager:       NewEnvManager(),
 		VoiceConnections: make(map[string]*discordgo.VoiceConnection),
 	}
-	bb.ServerEnv.Owner["default"] = &EnvOwner{make(map[string]EnvVar)}
-	bb.UserEnv.Owner["default"] = &EnvOwner{make(map[string]EnvVar)}
+	bb.EnvManager.Servers["default"] = &EnvServer{make(map[string]EnvVar), "default"}
 	bb.RequestManager = &RequestManager{
 		Requests: make(map[string]*Request),
 	}
@@ -35,6 +28,7 @@ func NewFromToken(token string, starter string, logger io.Writer) (*DJBot, error
 	if err != nil {
 		return nil, err
 	}
+
 	dg.AddHandler(bb.HandleNewMessage)
 	err = dg.Open()
 	if err != nil {

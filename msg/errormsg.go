@@ -26,7 +26,7 @@ const (
 	AcessUndefinedEnv  = "그런 설정 없어요."
 	NoString           = "interface is not a string"
 	UndefinedType      = "undefined type"
-	ConvertingError    = "타입 변환 에러"
+	TypesDontMatch     = "올바른 형식이 아닙니다"
 	NotMatchedParms    = "the number of parmeters don't match."
 	NoSupportOther     = "currently only supports for string, string slic, int, range and bool."
 	PermissionNoString = "permission env is not a string"

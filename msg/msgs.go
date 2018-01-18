@@ -6,10 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/ksunhokim123/sdbx-discord-dj-bot/utils"
-
 	"github.com/bwmarrin/discordgo"
-	"github.com/ksunhokim123/dgwidgets"
 )
 
 const (
@@ -29,28 +26,21 @@ func TimeOutMsg(sess *discordgo.Session, chID string, msgID string, t time.Durat
 	go timeOutMsg(sess, chID, msgID, t)
 }
 
-func ListMsg(list []string, userid string, channel string, sess *discordgo.Session) chan bool {
+func ListMsg(list []string, userid string, channel string, sess *discordgo.Session) {
 	usr, _ := sess.User(userid)
-	p := dgwidgets.NewPaginator(sess, channel)
-	for i := 0; i < len(list); i += 10 {
-		str := ""
-		for j := 0; j < utils.MinInt(10, len(list)-i); j++ {
-			str += fmt.Sprintln(i+j, " ", list[i+j])
-		}
-		p.Add(&discordgo.MessageEmbed{
-			Description: str,
-			Color:       0xffff00,
-			Footer: &discordgo.MessageEmbedFooter{
-				IconURL: usr.AvatarURL(""),
-				Text: usr.Username + "\n" +
-					"Page " + strconv.Itoa(i/10+1),
-			},
-		})
+	str := ""
+	for i := 0; i < len(list); i++ {
+		str += fmt.Sprintf("%d %s\n", i, list[i])
 	}
-	p.Widget.Timeout = time.Second * 20
-	p.ColourWhenDone = 0xfffff0
-	go p.Spawn()
-	return p.Widget.Close
+	embed := &discordgo.MessageEmbed{
+		Description: str,
+		Color:       0xffff00,
+		Footer: &discordgo.MessageEmbedFooter{
+			IconURL: usr.AvatarURL(""),
+			Text:    usr.Username,
+		},
+	}
+	sess.ChannelMessageSendEmbed(channel, embed)
 }
 
 type CmdList [][]string

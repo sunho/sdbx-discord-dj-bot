@@ -35,7 +35,7 @@ func (m *MusicServer) Search(sess *djbot.Session, keywords string) {
 
 	service, err := youtube.New(client)
 	if err != nil {
-		sess.Log("youtube err", err)
+		sess.Send("youtube err", err)
 		return
 	}
 
@@ -44,7 +44,7 @@ func (m *MusicServer) Search(sess *djbot.Session, keywords string) {
 		MaxResults(12)
 	response, err := call.Do()
 	if err != nil {
-		sess.Log("youtube err", err)
+		sess.Send("youtube err", err)
 		return
 	}
 	list := []string{}

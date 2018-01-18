@@ -13,10 +13,8 @@ type EnvGet struct {
 
 func (es *EnvGet) Handle(sess *djbot.Session, parms []interface{}) {
 	list := [][]string{}
-	for key, vars := range sess.GetServerOwner().Env {
-		if vars.ForUser {
-			list = append(list, []string{key, fmt.Sprint(vars.Var)})
-		}
+	for key, vars := range sess.GetEnvServer().Env {
+		list = append(list, []string{key, fmt.Sprint(vars.Var)})
 	}
 	msg.ListMsg2("Env list", list, sess.UserID, sess.ChannelID, sess.Session)
 }

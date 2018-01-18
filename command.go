@@ -1,9 +1,10 @@
 package djbot
 
 import (
-	"fmt"
+	"os"
 	"strings"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/bwmarrin/discordgo"
 	"github.com/ksunhokim123/sdbx-discord-dj-bot/envs"
 	"github.com/ksunhokim123/sdbx-discord-dj-bot/msg"
@@ -26,11 +27,11 @@ type help struct {
 }
 
 func (h *help) Handle(sess *Session, parms []interface{}) {
-	str := [][]string{}
-	for i, cmd := range h.fc.Commands {
-		str = append(str, []string{i, cmd.Description()})
+	strs := [][]string{}
+	for key, cmd := range h.fc.Commands {
+		strs = append(strs, []string{key, cmd.Description()})
 	}
-	msg.ListMsg2("Commands list", str, sess.UserID, sess.ChannelID, sess.Session)
+	msg.ListMsg2("Commands list", strs, sess.UserID, sess.ChannelID, sess.Session)
 }
 
 func (h *help) Description() string {
@@ -40,6 +41,7 @@ func (h *help) Description() string {
 func (h *help) Types() []stypes.Type {
 	return []stypes.Type{}
 }
+
 func NewFamilyCommand(description string) *FamilyCommand {
 	fc := &FamilyCommand{
 		Commands:          make(map[string]Command),
@@ -49,30 +51,29 @@ func NewFamilyCommand(description string) *FamilyCommand {
 	return fc
 }
 
-func (cmd *FamilyCommand) Handle(sess *Session, parms []interface{}) {
-	s := parms[0].([]string)
-	if len(s) == 0 {
-		sess.SendStr(msg.NoSuchCommand)
+func (fc *FamilyCommand) Handle(sess *Session, parms []interface{}) {
+	msgstr := parms[0].([]string)
+	if len(msgstr) == 0 {
+		sess.Send(msg.NoSuchCommand)
 		return
 	}
-	if item, ok := cmd.Commands[s[0]]; ok {
-		ia, err := stypes.TypeConvertMany(s[1:], item.Types())
+	if item, ok := fc.Commands[msgstr[0]]; ok {
+		iarr, err := stypes.TypeConvertMany(msgstr[1:], item.Types())
 		if err != nil {
-			str := fmt.Sprint(err)
-			sess.SendStr(str)
+			sess.Send(err)
 			return
 		}
-		item.Handle(sess, ia)
+		item.Handle(sess, iarr)
 	} else {
-		sess.SendStr(msg.NoSuchCommand)
+		sess.Send(msg.NoSuchCommand)
 	}
 }
 
-func (cmd *FamilyCommand) Description() string {
-	return cmd.CustomDescription
+func (fc *FamilyCommand) Description() string {
+	return fc.CustomDescription
 }
 
-func (cmd *FamilyCommand) Types() []stypes.Type {
+func (fc *FamilyCommand) Types() []stypes.Type {
 	return []stypes.Type{stypes.TypeStrings}
 }
 
@@ -82,58 +83,26 @@ type CommandMannager struct {
 }
 
 func NewCommandManager(starter string) *CommandMannager {
-	nc := NewFamilyCommand("")
+	fc := NewFamilyCommand("")
+	if len(starter) == 0 {
+		log.Error("no starter!")
+		os.Exit(0)
+	}
 	return &CommandMannager{
-		FamilyCommand: nc,
+		FamilyCommand: fc,
 		Starter:       starter,
 	}
 }
 
-//TODO make independent permission
-func permmisionCheck(s *Session, str string) bool {
-	if (discordgo.PermissionAdministrator & s.GetPermission()) != 0 {
-		return true
-	}
-	for key, env := range s.GetServerOwner().Env {
-		if strings.HasPrefix(key, "permi ") {
-			key = strings.TrimPrefix(key, "permi ")
-			evar, ok := (env.Var).(string)
-			if !ok {
-				fmt.Fprintln(s.DJBot.Loggers, msg.PermissionNoString)
-			}
-			if strings.HasPrefix(str, key) && evar != "" {
-
-				earray := strings.Split(evar, ",")
-				for _, b := range s.GetRoles() {
-					for _, a := range earray {
-						if a == b {
-							return true
-						}
-					}
-				}
-				return false
-			}
+func (cm *CommandMannager) HandleMessage(s *Session, msgc *discordgo.MessageCreate) {
+	str := []rune(msgc.Content)
+	if string(str[0:len(cm.Starter)]) == cm.Starter {
+		if len(str) >= envs.MAXMSG {
+			s.Send(msg.NoJustATrick)
+			return
 		}
-	}
-	return true
-}
-
-func (cm *CommandMannager) HandleMessage(s *Session, msg2 *discordgo.MessageCreate) {
-	if len(cm.Starter) != 0 {
-		str := []rune(msg2.Content)
-		if string(str[0:len(cm.Starter)]) == cm.Starter {
-			if len(str) >= envs.MAXMSG {
-				s.SendStr(msg.NoJustATrick)
-				return
-			}
-			pstr := string(str[len(cm.Starter):])
-			arr := strings.Split(pstr, " ")
-			if permmisionCheck(s, pstr) {
-				cm.Handle(s, []interface{}{arr})
-			}
-
-		}
-	} else {
-		fmt.Fprintln(s.DJBot.Loggers, msg.NoStarter)
+		pstr := string(str[len(cm.Starter):])
+		arr := strings.Split(pstr, " ")
+		cm.Handle(s, []interface{}{arr})
 	}
 }

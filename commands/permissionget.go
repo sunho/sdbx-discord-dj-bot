@@ -14,7 +14,7 @@ type PermissionGet struct {
 
 func (es *PermissionGet) Handle(sess *djbot.Session, parms []interface{}) {
 	list := [][]string{}
-	for key, vars := range sess.GetServerOwner().Env {
+	for key, vars := range sess.GetEnvServer().Env {
 		if strings.HasPrefix(key, "permi ") {
 			key = strings.TrimPrefix(key, "permi ")
 			list = append(list, []string{key, fmt.Sprint(vars.Var)})

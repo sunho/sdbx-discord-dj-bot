@@ -12,8 +12,8 @@ type VoiceConnect struct {
 }
 
 func (vc *VoiceConnect) Handle(sess *djbot.Session, parms []interface{}) {
-	if only, _ := sess.GetServerOwner().GetEnv(envs.CHANNELONLY); only.(bool) {
-		channel, err := sess.GetServerOwner().GetEnv("Channel")
+	if only, _ := sess.GetEnvServer().GetEnv(envs.CHANNELONLY); only.(bool) {
+		channel, err := sess.GetEnvServer().GetEnv("Channel")
 		if err == nil {
 			vc.Connect(sess, channel)
 			return

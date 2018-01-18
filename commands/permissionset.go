@@ -19,7 +19,7 @@ func (es *PermissionSet) Handle(sess *djbot.Session, parms []interface{}) {
 	}
 	roles := parms[0].(string)
 	roles = strings.Replace(roles, "-", " ", -1)
-	err := sess.GetServerOwner().SetEnvWithInterface("permi "+cmd, roles)
+	err := sess.GetEnvServer().SetEnvWithInterface("permi "+cmd, roles)
 	if err != nil {
 		sess.SendStr(err.Error())
 		return
