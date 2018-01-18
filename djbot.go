@@ -12,6 +12,7 @@ type DJBot struct {
 	UserEnv          EnvManager //TODO: make independent one
 	ServerEnv        EnvManager
 	VoiceConnections map[string]*discordgo.VoiceConnection
+	YoutubeToken     string
 	Discord          *discordgo.Session
 	RequestManager   *RequestManager
 }
@@ -19,8 +20,8 @@ type DJBot struct {
 func NewFromToken(token string, starter string, logger io.Writer) (*DJBot, error) {
 	bb := &DJBot{
 		CommandMannager:  NewCommandManager(starter),
-		UserEnv:          EnvManager{make(map[string]*EnvOwner)},
-		ServerEnv:        EnvManager{make(map[string]*EnvOwner)},
+		UserEnv:          NewEnvManager(),
+		ServerEnv:        NewEnvManager(),
 		Loggers:          logger,
 		VoiceConnections: make(map[string]*discordgo.VoiceConnection),
 	}
@@ -35,7 +36,6 @@ func NewFromToken(token string, starter string, logger io.Writer) (*DJBot, error
 		return nil, err
 	}
 	dg.AddHandler(bb.HandleNewMessage)
-
 	err = dg.Open()
 	if err != nil {
 		return nil, err

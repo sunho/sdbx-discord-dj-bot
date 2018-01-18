@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ksunhokim123/sdbx-discord-dj-bot/errormsg"
+	"github.com/ksunhokim123/sdbx-discord-dj-bot/msg"
 )
 
 type Type int
@@ -15,6 +15,7 @@ const (
 	TypeInt Type = iota
 	TypeString
 	TypeStrings
+	TypeBool
 	TypeRange
 	TypeOther
 )
@@ -30,11 +31,17 @@ func GetType(in interface{}) Type {
 		return TypeString
 	case []string:
 		return TypeStrings
+	case bool:
+		return TypeBool
 	case Range:
 		return TypeRange
 	default:
 		return TypeOther
 	}
+}
+
+func e(str string) error {
+	return errors.New(str)
 }
 
 func TypeConvertOne(str string, t Type) (interface{}, error) {
@@ -48,21 +55,29 @@ func typeConvertOne(nstr []string, t Type) (interface{}, error) {
 		if t == TypeStrings {
 			return []string{""}, nil
 		}
-		return nil, errors.New(errormsg.NotEnoughMinerals)
+		return nil, e(msg.NotEnoughMinerals)
 	}
 	switch t {
 	case TypeInt:
 		i, err := strconv.Atoi(nstr[0])
 		if err != nil {
-			return nil, errors.New(errormsg.ConvertingError)
+			return nil, e(msg.ConvertingError)
 		}
 		return i, nil
 	case TypeString:
 		return nstr[0], nil
 	case TypeStrings:
 		return nstr, nil
+	case TypeBool:
+		if nstr[0] == "true" {
+			return true, nil
+		} else if nstr[0] == "false" {
+			return false, nil
+		} else {
+			return nil, e(msg.ConvertingError)
+		}
 	default:
-		return nil, errors.New(errormsg.UndefinedType)
+		return nil, e(msg.UndefinedType)
 	}
 }
 
@@ -89,5 +104,5 @@ func TypeConvertMany(strs []string, types []Type) ([]interface{}, error) {
 	if len(types) == len(strs) {
 		return ia, nil
 	}
-	return nil, errors.New(errormsg.SoEnoughMinerals)
+	return nil, e(msg.SoEnoughMinerals)
 }

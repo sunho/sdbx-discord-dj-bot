@@ -3,6 +3,7 @@ package commands
 import (
 	"github.com/bwmarrin/discordgo"
 	djbot "github.com/ksunhokim123/sdbx-discord-dj-bot"
+	"github.com/ksunhokim123/sdbx-discord-dj-bot/msg"
 	"github.com/ksunhokim123/sdbx-discord-dj-bot/stypes"
 )
 
@@ -29,9 +30,11 @@ func (vc *VoiceConnect) Connect(sess *djbot.Session, id interface{}) {
 	id2, ok := id.(string)
 	if ok {
 		vc, err := sess.ChannelVoiceJoin(sess.ServerID, id2, false, true)
-		if err == nil {
-			sess.DJBot.VoiceConnections[sess.ServerID] = vc
+		if err != nil {
+			sess.SendStr(msg.NoJustATrick)
+			return
 		}
+		sess.DJBot.VoiceConnections[sess.ServerID] = vc
 	}
 }
 func (vc *VoiceConnect) Description() string {
