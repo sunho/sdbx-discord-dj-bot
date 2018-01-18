@@ -30,7 +30,7 @@ func (h *help) Handle(sess *Session, parms []interface{}) {
 	for i, cmd := range h.fc.Commands {
 		str = append(str, []string{i, cmd.Description()})
 	}
-	msg.HelpMsg(str, sess.UserID, sess.ChannelID, sess.Session)
+	msg.ListMsg2("Commands list", str, sess.UserID, sess.ChannelID, sess.Session)
 }
 
 func (h *help) Description() string {
@@ -97,11 +97,12 @@ func permmisionCheck(s *Session, str string) bool {
 	for key, env := range s.GetServerOwner().Env {
 		if strings.HasPrefix(key, "permi ") {
 			key = strings.TrimPrefix(key, "permi ")
-			if strings.HasPrefix(str, key) {
-				evar, ok := (env.Var).(string)
-				if !ok {
-					fmt.Fprintln(s.DJBot.Loggers, msg.PermissionNoString)
-				}
+			evar, ok := (env.Var).(string)
+			if !ok {
+				fmt.Fprintln(s.DJBot.Loggers, msg.PermissionNoString)
+			}
+			if strings.HasPrefix(str, key) && evar != "" {
+
 				earray := strings.Split(evar, ",")
 				for _, b := range s.GetRoles() {
 					for _, a := range earray {

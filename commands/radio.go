@@ -1,4 +1,4 @@
 package commands
 
-type Recommend struct {
+type Radio struct {
 }

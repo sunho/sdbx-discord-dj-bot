@@ -42,15 +42,19 @@ func main() {
 		fmt.Println(err.Error())
 		return
 	}
+	bb.ServerEnv.Load("ho2.json")
 	bb.ServerEnv.MakeDefaultEnv("Channel", "", true)
 	bb.ServerEnv.MakeDefaultEnv("MaxMsg", 200, true)
+	bb.ServerEnv.MakeDefaultEnv(envs.SKIPVOTE, true, true)
 	bb.ServerEnv.MakeDefaultEnv(envs.CHANNELONLY, true, true)
-	bb.ServerEnv.Load("ho2.json")
+	bb.ServerEnv.Update()
 	music := commands.NewMusic()
 	bb.CommandMannager.Commands["chid"] = &commands.ChannelView{}
+	bb.CommandMannager.Commands["permiget"] = &commands.PermissionGet{}
+	bb.CommandMannager.Commands["permiset"] = &commands.PermissionSet{}
 	bb.CommandMannager.Commands["envset"] = &commands.EnvSet{}
 	bb.CommandMannager.Commands["envget"] = &commands.EnvGet{}
-	bb.CommandMannager.Commands["skip"] = &commands.MusicFSkip{music}
+	bb.CommandMannager.Commands["skip"] = &commands.MusicSkip{music}
 	bb.CommandMannager.Commands["fskip"] = &commands.MusicFSkip{music}
 	bb.CommandMannager.Commands["add"] = &commands.MusicAdd{music}
 	bb.CommandMannager.Commands["search"] = &commands.MusicSearch{music}

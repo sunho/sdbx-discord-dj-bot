@@ -15,11 +15,6 @@ type MusicAdd struct {
 func (mc *MusicAdd) Handle(sess *djbot.Session, parms []interface{}) {
 	server := mc.Music.GetServer(sess.ServerID)
 	server.Add(sess, parms[0].(string))
-	if sess.VoiceConnection != nil {
-		if server.State == NotPlaying {
-			server.Start(sess)
-		}
-	}
 }
 
 func (mc *MusicAdd) Description() string {
@@ -38,6 +33,11 @@ func (m *MusicServer) AddSong(sess *djbot.Session, song *Song) {
 	m.Lock()
 	m.Songs = append(m.Songs, song)
 	m.Unlock()
+	if sess.VoiceConnection != nil {
+		if m.State == NotPlaying {
+			m.Start(sess)
+		}
+	}
 }
 
 func (m *MusicServer) Add(sess *djbot.Session, url string) {

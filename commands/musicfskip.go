@@ -14,9 +14,11 @@ type MusicFSkip struct {
 func (mc *MusicFSkip) Handle(sess *djbot.Session, parms []interface{}) {
 	mc.Music.GetServer(sess.ServerID).SkipChan <- true
 }
+
 func (vc *MusicFSkip) Description() string {
 	return msg.DescriptionMusicQueue
 }
+
 func (vc *MusicFSkip) Types() []stypes.Type {
 	return []stypes.Type{}
 }

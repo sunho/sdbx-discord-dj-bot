@@ -56,8 +56,9 @@ func (m *Music) InitializeServer(ID string) {
 	m.Lock()
 	if _, ok := m.Servers[ID]; !ok {
 		m.Servers[ID] = &MusicServer{
-			SkipChan: make(chan bool),
-			Songs:    []*Song{},
+			SkipChan:  make(chan bool),
+			Songs:     []*Song{},
+			SkipVotes: nil,
 		}
 	}
 	m.Unlock()

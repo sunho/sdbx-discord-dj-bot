@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"fmt"
+
 	djbot "github.com/ksunhokim123/sdbx-discord-dj-bot"
 	"github.com/ksunhokim123/sdbx-discord-dj-bot/envs"
 	"github.com/ksunhokim123/sdbx-discord-dj-bot/msg"
@@ -27,24 +29,42 @@ func (mc *MusicSkip) Handle(sess *djbot.Session, parms []interface{}) {
 			recipentn++
 		}
 	}
-	option, err := sess.GetServerOwner().GetEnv(envs.SKIPVOTE)
-	if err != nil {
-		return
-	}
-	if recipentn <= 2 || !option.(bool) {
+	if server.SkipVote(sess, recipentn) {
 		server.SkipChan <- true
-		return
 	}
-
 }
 
-func (m *MusicServer) SkipVote(sess *djbot.Session, userID string) {
+func (m *MusicServer) SkipVote(sess *djbot.Session, recipentn int) bool {
 	m.Lock()
-	if _, ok := m.SkipVotes[userID]; !ok {
-
+	defer func() {
+		m.Unlock()
+	}()
+	option, err := sess.GetServerOwner().GetEnv(envs.SKIPVOTE)
+	if err != nil {
+		option = false
 	}
-	m.SkipVotes[userID] = true
-	m.Unlock()
+
+	if recipentn <= 2 || !option.(bool) {
+		return true
+	}
+
+	if m.SkipVotes == nil {
+		m.SkipVotes = make(map[string]bool)
+		m.TargetSkipVote = (recipentn-1)/2 + 1
+	}
+
+	if _, ok := m.SkipVotes[sess.UserID]; !ok {
+		m.SkipVotes[sess.UserID] = true
+		sess.SendStr(fmt.Sprint(msg.Voted, len(m.SkipVotes), "/", m.TargetSkipVote))
+	}
+
+	if len(m.SkipVotes) >= m.TargetSkipVote {
+		m.SkipVotes = nil
+		m.TargetSkipVote = 0
+		return true
+	}
+
+	return false
 }
 
 func (vc *MusicSkip) Description() string {

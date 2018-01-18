@@ -18,7 +18,7 @@ func (es *EnvGet) Handle(sess *djbot.Session, parms []interface{}) {
 			list = append(list, []string{key, fmt.Sprint(vars.Var)})
 		}
 	}
-	msg.EnvMsg(list, sess.UserID, sess.ChannelID, sess.Session)
+	msg.ListMsg2("Env list", list, sess.UserID, sess.ChannelID, sess.Session)
 }
 
 func (es *EnvGet) Description() string {

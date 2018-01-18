@@ -12,6 +12,13 @@ import (
 	"github.com/ksunhokim123/dgwidgets"
 )
 
+const (
+	Voted    = "현재 곡 탄핵 투표"
+	Skipped  = "탄핵됨"
+	Envset   = "설정 변수 설정 완료"
+	Permiset = "권한 설정 완료"
+)
+
 func timeOutMsg(sess *discordgo.Session, chID string, msgID string, t time.Duration) {
 	timer := time.NewTimer(t)
 	<-timer.C
@@ -60,29 +67,7 @@ func (list CmdList) Less(i, j int) bool {
 	return list[i][0] < list[j][0]
 }
 
-func HelpMsg(list CmdList, userid string, channel string, sess *discordgo.Session) {
-	usr, _ := sess.User(userid)
-	sort.Sort(list)
-	fields := []*discordgo.MessageEmbedField{}
-	for i := 0; i < len(list); i++ {
-		fields = append(fields, &discordgo.MessageEmbedField{
-			Name:  list[i][0],
-			Value: list[i][1],
-		})
-	}
-	eb := &discordgo.MessageEmbed{
-		Title:  "Commands list",
-		Fields: fields,
-		Color:  0xffff00,
-		Footer: &discordgo.MessageEmbedFooter{
-			IconURL: usr.AvatarURL(""),
-			Text:    usr.Username,
-		},
-	}
-	sess.ChannelMessageSendEmbed(channel, eb)
-}
-
-func EnvMsg(list CmdList, userid string, channel string, sess *discordgo.Session) {
+func ListMsg2(name string, list CmdList, userid string, channel string, sess *discordgo.Session) {
 	usr, _ := sess.User(userid)
 	sort.Sort(list)
 	fields := []*discordgo.MessageEmbedField{}
@@ -96,7 +81,7 @@ func EnvMsg(list CmdList, userid string, channel string, sess *discordgo.Session
 		})
 	}
 	eb := &discordgo.MessageEmbed{
-		Title:  "Env list",
+		Title:  name,
 		Fields: fields,
 		Color:  0xffff00,
 		Footer: &discordgo.MessageEmbedFooter{
@@ -134,4 +119,8 @@ func AddedToQueue(song []string, position int, userid string, channel string, se
 		},
 	}
 	sess.ChannelMessageSendEmbed(channel, eb)
+}
+
+func Success(description string, channel string, sess *discordgo.Session) {
+
 }

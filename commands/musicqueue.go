@@ -13,7 +13,6 @@ type MusicQueue struct {
 //TODO: replcae this into better one
 func (mc *MusicQueue) Handle(sess *djbot.Session, parms []interface{}) {
 	d := []string{}
-
 	songs := mc.Music.GetServer(sess.ServerID).Songs
 	for i := 0; i < len(songs); i++ {
 		usr, _ := sess.User(songs[i].Requester)

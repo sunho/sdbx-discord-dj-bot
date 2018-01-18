@@ -20,15 +20,6 @@ type EnvVar struct {
 	ForUser bool
 }
 
-type UpdatableVar interface {
-	Get(string) string
-	Set(string, string) error
-}
-
-type Updatable struct {
-	Var *UpdatableVar
-}
-
 type EnvOwner struct {
 	Env map[string]EnvVar
 }
@@ -77,11 +68,10 @@ func (base *EnvManager) Load(filename string) error {
 	if err != nil {
 		return err
 	}
-	base.updateEnv()
 	return nil
 }
 
-func (base *EnvManager) updateEnv() {
+func (base *EnvManager) Update() {
 	defaultow := base.Owner["default"]
 	for _, owner := range base.Owner {
 		for key := range owner.Env {
@@ -152,6 +142,7 @@ func (base *EnvOwner) SetEnvWithInterface(key string, in interface{}) error {
 	}
 	if t := stypes.GetType(in); t != stypes.TypeOther {
 		base.Env[key] = EnvVar{in, t, false}
+		return nil
 	}
 	return e(msg.NoSupportOther)
 }
