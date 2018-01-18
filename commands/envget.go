@@ -11,7 +11,11 @@ import (
 type EnvGet struct {
 }
 
-func (es *EnvGet) Handle(sess *djbot.Session, parms []interface{}) {
+func (eg *EnvGet) Handle(sess *djbot.Session, parms []interface{}) {
+	if !sess.IsAdmin() {
+		sess.Send(msg.NoPermission)
+		return
+	}
 	list := [][]string{}
 	for key, vars := range sess.GetEnvServer().Env {
 		list = append(list, []string{key, fmt.Sprint(vars.Var)})
@@ -19,10 +23,10 @@ func (es *EnvGet) Handle(sess *djbot.Session, parms []interface{}) {
 	msg.ListMsg2("Env list", list, sess.UserID, sess.ChannelID, sess.Session)
 }
 
-func (es *EnvGet) Description() string {
-	return msg.DescriptionEnvSet
+func (eg *EnvGet) Description() string {
+	return msg.DescriptionEnvGet
 }
 
-func (es *EnvGet) Types() []stypes.Type {
+func (eg *EnvGet) Types() []stypes.Type {
 	return []stypes.Type{}
 }

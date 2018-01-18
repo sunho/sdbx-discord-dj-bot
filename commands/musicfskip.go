@@ -10,8 +10,11 @@ type MusicFSkip struct {
 	Music *Music
 }
 
-//TODO: replcae this into better one
 func (mc *MusicFSkip) Handle(sess *djbot.Session, parms []interface{}) {
+	if !sess.IsAdmin() {
+		sess.Send(msg.NoPermission)
+		return
+	}
 	mc.Music.GetServer(sess.ServerID).SkipChan <- true
 }
 

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"regexp"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -18,17 +19,22 @@ import (
 
 type State int
 
+func e(str string) error {
+	return errors.New(str)
+}
+
 const (
 	NotPlaying State = iota
 	Playing
 )
 
 type Song struct {
-	Requester string
-	Name      string
-	Duration  time.Duration
-	Type      string
-	Url       string
+	Requester   string
+	RequesterID string
+	Name        string
+	Duration    time.Duration
+	Type        string
+	Url         string
 }
 
 type MusicServer struct {
@@ -69,52 +75,55 @@ func (m *Music) GetServer(ID string) *MusicServer {
 	return m.Servers[ID]
 }
 
-func MakeService(sess *djbot.Session) (*youtube.Service, error) {
+func MakeYoutubeService(sess *djbot.Session) (*youtube.Service, error) {
 	client := &http.Client{
 		Transport: &transport.APIKey{Key: sess.DJBot.YoutubeToken},
 	}
 	service, err := youtube.New(client)
 	if err != nil {
-		sess.Send("youtube err", err)
-		return nil, errors.New(msg.NoJustATrick)
+		return nil, err
 	}
 	return service, nil
 }
 
-func GetSong(sess *djbot.Session, ID string) *Song {
-	service, err := MakeService(sess)
+func GetSongs(sess *djbot.Session, ID []string) ([]*Song, error) {
+	service, err := MakeYoutubeService(sess)
 	if err != nil {
-		sess.Send("youtube err", err)
-		return nil
+		return nil, err
 	}
 	call := service.Videos.List("id,snippet,contentDetails")
-	call = call.Id(ID)
+	call.Id(strings.Join(ID, ","))
+
 	response, err := call.Do()
 	if err != nil {
-		sess.Send("youtube err", err)
-		return nil
+		return nil, err
 	}
-	if len(response.Items) != 1 {
-		return nil
+
+	if len(response.Items) != len(ID) {
+		return nil, e(msg.NoID)
 	}
-	video := response.Items[0]
-	if video.Kind != "youtube#video" {
-		sess.SendStr(msg.NoJustATrick)
-		return nil
+	songs := []*Song{}
+	for i := 0; i < len(response.Items); i++ {
+		video := response.Items[i]
+		if video.Kind != "youtube#video" {
+			return nil, e(msg.NoID)
+		}
+		typ := "Non-Music"
+		if video.Snippet.CategoryId == "10" {
+			typ = "Music"
+		}
+		dur := ParseDuration(video.ContentDetails.Duration)
+		songs = append(songs, &Song{
+			Name:        video.Snippet.Title,
+			Url:         "https://www.youtube.com/watch?v=" + ID[i],
+			Type:        typ,
+			Duration:    dur,
+			Requester:   sess.UserName,
+			RequesterID: sess.UserID,
+		})
 	}
-	typ := "Non-Music"
-	if video.Snippet.CategoryId == "10" {
-		typ = "Music"
-	}
-	dur := ParseDuration(video.ContentDetails.Duration)
-	song := &Song{
-		Name:      video.Snippet.Title,
-		Url:       "https://www.youtube.com/watch?v=" + ID,
-		Type:      typ,
-		Duration:  dur,
-		Requester: sess.UserID,
-	}
-	return song
+
+	return songs, nil
 }
 
 func ParseDuration(str string) time.Duration {

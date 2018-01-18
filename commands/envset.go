@@ -10,13 +10,17 @@ type EnvSet struct {
 }
 
 func (es *EnvSet) Handle(sess *djbot.Session, parms []interface{}) {
+	if !sess.IsAdmin() {
+		sess.Send(msg.NoPermission)
+		return
+	}
 	vars := parms[1].(string)
 	if vars == "nil" {
 		vars = ""
 	}
 	err := sess.GetEnvServer().SetEnvWithStr(parms[0].(string), vars)
 	if err != nil {
-		sess.SendStr(err.Error())
+		sess.Send(err)
 	}
 }
 

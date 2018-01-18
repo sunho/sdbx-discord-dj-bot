@@ -30,4 +30,6 @@ const (
 	NotMatchedParms    = "the number of parmeters don't match."
 	NoSupportOther     = "currently only supports for string, string slic, int, range and bool."
 	PermissionNoString = "permission env is not a string"
+	NoPermission       = "권한이 부족합니다"
+	NoID               = "해당 동영상을 찾지 못했습니다"
 )

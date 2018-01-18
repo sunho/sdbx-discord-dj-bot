@@ -42,3 +42,12 @@ func (sess *Session) GetRoles() []string {
 	gm, _ := sess.GuildMember(sess.ServerID, sess.UserID)
 	return gm.Roles
 }
+
+func (sess *Session) IsAdmin() bool {
+	return (sess.GetPermission() & discordgo.PermissionAdministrator) != 0
+}
+
+func (sess *Session) IsDJ() bool {
+	fmt.Println(sess.GetRoles())
+	return false
+}

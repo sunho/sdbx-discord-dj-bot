@@ -3,13 +3,18 @@ package commands
 import (
 	"github.com/bwmarrin/discordgo"
 	djbot "github.com/ksunhokim123/sdbx-discord-dj-bot"
+	"github.com/ksunhokim123/sdbx-discord-dj-bot/msg"
 	"github.com/ksunhokim123/sdbx-discord-dj-bot/stypes"
 )
 
 type ChannelView struct {
 }
 
-func (vc *ChannelView) Handle(sess *djbot.Session, parms []interface{}) {
+func (cv *ChannelView) Handle(sess *djbot.Session, parms []interface{}) {
+	if !sess.IsAdmin() {
+		sess.Send(msg.NoPermission)
+		return
+	}
 	gd, _ := sess.Guild(sess.ServerID)
 	slist := []string{}
 	dlist := []interface{}{}
@@ -28,15 +33,15 @@ func (vc *ChannelView) Handle(sess *djbot.Session, parms []interface{}) {
 	sess.DJBot.RequestManager.Set(sess, &djbot.Request{
 		List:     slist,
 		DataList: dlist,
-		CallBack: vc.Select,
+		CallBack: cv.Select,
 	})
 }
-func (vc *ChannelView) Select(sess *djbot.Session, id interface{}) {
+func (cv *ChannelView) Select(sess *djbot.Session, id interface{}) {
 	sess.SendStr(id.(string))
 }
-func (vc *ChannelView) Description() string {
-	return "this will make the bot connect to your voice channel"
+func (cv *ChannelView) Description() string {
+	return msg.DescriptionChannelView
 }
-func (vc *ChannelView) Types() []stypes.Type {
+func (cv *ChannelView) Types() []stypes.Type {
 	return []stypes.Type{}
 }

@@ -47,6 +47,10 @@ func (m *MusicServer) Add(sess *djbot.Session, url string) {
 		return
 	}
 	id := matched[5]
-	song := GetSong(sess, id)
-	m.AddSong(sess, song)
+	songs, err := GetSongs(sess, []string{id})
+	if err != nil {
+		sess.Send(err)
+		return
+	}
+	m.AddSong(sess, songs[0])
 }

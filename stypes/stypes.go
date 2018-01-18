@@ -61,7 +61,7 @@ func typeConvertOne(nstr []string, t Type) (interface{}, error) {
 	case TypeInt:
 		i, err := strconv.Atoi(nstr[0])
 		if err != nil {
-			return nil, e(msg.ConvertingError)
+			return nil, e(msg.TypesDontMatch)
 		}
 		return i, nil
 	case TypeString:
@@ -74,7 +74,7 @@ func typeConvertOne(nstr []string, t Type) (interface{}, error) {
 		} else if nstr[0] == "false" {
 			return false, nil
 		} else {
-			return nil, e(msg.ConvertingError)
+			return nil, e(msg.TypesDontMatch)
 		}
 	default:
 		return nil, e(msg.UndefinedType)

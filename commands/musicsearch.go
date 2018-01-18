@@ -47,15 +47,26 @@ func (m *MusicServer) Search(sess *djbot.Session, keywords string) {
 		sess.Send("youtube err", err)
 		return
 	}
-	list := []string{}
-	dlist := []interface{}{}
-	for _, item := range response.Items {
-		if item.Id.Kind == "youtube#video" {
-			song := GetSong(sess, item.Id.VideoId)
-			list = append(list, "`"+song.Name+"` **"+song.Duration.String()+"**")
-			dlist = append(dlist, song)
+
+	slist := []string{}
+	items := response.Items
+	for i := 0; i < len(items); i++ {
+		if items[i].Id.Kind == "youtube#video" {
+			slist = append(slist, items[i].Id.VideoId)
 		}
 	}
+	songs, err := GetSongs(sess, slist)
+	if err != nil {
+		sess.Send(err)
+		return
+	}
+	list := []string{}
+	dlist := []interface{}{}
+	for i := 0; i < len(songs); i++ {
+		list = append(list, "`"+songs[i].Name+"` **"+songs[i].Duration.String()+"**")
+		dlist = append(dlist, songs[i])
+	}
+
 	r := &djbot.Request{
 		List:     list,
 		DataList: dlist,
