@@ -27,7 +27,7 @@ func (vc *VoiceDisconnect) Handle(sess *djbot.Session, parms []interface{}) {
 	server.ControlChan <- ControlDisconnect
 }
 func (vc *VoiceDisconnect) Description() string {
-	return "this will make the bot connect to your voice channel"
+	return msg.DescriptionMusicDisconnect
 }
 func (vc *VoiceDisconnect) Types() []stypes.Type {
 	return []stypes.Type{}

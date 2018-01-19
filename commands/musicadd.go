@@ -29,10 +29,10 @@ func (m *MusicServer) AddSong(sess *djbot.Session, song *Song) {
 	if song == nil {
 		return
 	}
-	msg.AddedToQueue([]string{song.Name, song.Type, song.Duration.String()}, len(m.Songs), sess.UserID, sess.ChannelID, sess.Session)
 	m.Lock()
 	m.Songs = append(m.Songs, song)
 	m.Unlock()
+	msg.AddedToQueue([]string{song.Name, song.Type, song.Duration.String(), song.Thumbnail}, len(m.Songs), sess.UserID, sess.ChannelID, sess.Session)
 	if sess.VoiceConnection != nil {
 		if m.State == NotPlaying {
 			m.Start(sess)

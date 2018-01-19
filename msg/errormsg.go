@@ -36,4 +36,5 @@ const (
 	NoQueue            = ":question: 노래가 없는데 왜 재생하란거죠"
 	HentaiChannel      = ":eyes: 여기서 뭐하시는 겁니까?"
 	WhyDisconnect      = ":eyes: 나갈 채널이 없는데 뭐하잔거죠."
+	NoCategory         = ":eyes: 그런 카테고리 없어요"
 )

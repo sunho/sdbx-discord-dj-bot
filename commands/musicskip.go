@@ -59,7 +59,7 @@ func (m *MusicServer) SkipVote(sess *djbot.Session, recipentn int) bool {
 }
 
 func (vc *MusicSkip) Description() string {
-	return msg.DescriptionMusicQueue
+	return msg.DescriptionMusicSkip
 }
 
 func (vc *MusicSkip) Types() []stypes.Type {

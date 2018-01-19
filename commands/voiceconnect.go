@@ -57,7 +57,7 @@ func (vc *VoiceConnect) Connect(sess *djbot.Session, id interface{}) {
 	}
 }
 func (vc *VoiceConnect) Description() string {
-	return "this will make the bot connect to your voice channel"
+	return msg.DescriptionMusicConnect
 }
 func (vc *VoiceConnect) Types() []stypes.Type {
 	return []stypes.Type{}

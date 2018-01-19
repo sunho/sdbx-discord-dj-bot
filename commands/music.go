@@ -35,6 +35,7 @@ type Song struct {
 	Duration    time.Duration
 	Type        string
 	Url         string
+	Thumbnail   string
 }
 
 type MusicControl int
@@ -85,13 +86,10 @@ func (m *Music) GetServer(ID string) *MusicServer {
 	return m.Servers[ID]
 }
 
-func (m *MusicServer) RemoveSong(song *Song) {
-	for index, item := range m.Songs {
-		if item == song {
-			m.Songs = append(m.Songs[:index], m.Songs[index+1:]...)
-			return
-		}
-	}
+func (m *MusicServer) RemoveSong(index int) {
+	m.Lock()
+	m.Songs = append(m.Songs[:index], m.Songs[index+1:]...)
+	m.Unlock()
 }
 
 func MakeYoutubeService(sess *djbot.Session) (*youtube.Service, error) {
@@ -146,12 +144,14 @@ func GetSongs(sess *djbot.Session, ID []string) ([]*Song, error) {
 		if video.Snippet.CategoryId == "10" {
 			typ = "Music"
 		}
+		thumbnail := video.Snippet.Thumbnails.Default.Url
 		dur := ParseDuration(video.ContentDetails.Duration)
 		songs = append(songs, &Song{
 			Name:        video.Snippet.Title,
 			Url:         "https://www.youtube.com/watch?v=" + ID[i],
 			Type:        typ,
 			Duration:    dur,
+			Thumbnail:   thumbnail,
 			Requester:   sess.UserName,
 			RequesterID: sess.UserID,
 		})

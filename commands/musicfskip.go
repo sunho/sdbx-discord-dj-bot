@@ -19,7 +19,7 @@ func (mc *MusicFSkip) Handle(sess *djbot.Session, parms []interface{}) {
 }
 
 func (vc *MusicFSkip) Description() string {
-	return msg.DescriptionMusicQueue
+	return msg.DescriptionMusicFSkip
 }
 
 func (vc *MusicFSkip) Types() []stypes.Type {

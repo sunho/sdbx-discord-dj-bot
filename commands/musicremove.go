@@ -13,11 +13,11 @@ type MusicRemove struct {
 func (mc *MusicRemove) Handle(sess *djbot.Session, parms []interface{}) {
 	index := parms[0].(int)
 	server := mc.Music.GetServer(sess.ServerID)
-	server.Remove(stypes.Range{index, index})
+	server.Remove(sess, stypes.Range{index, index})
 }
 
 func (vc *MusicRemove) Description() string {
-	return msg.DescriptionMusicQueue
+	return msg.DescriptionMusicRemove
 }
 
 func (vc *MusicRemove) Types() []stypes.Type {
@@ -25,7 +25,9 @@ func (vc *MusicRemove) Types() []stypes.Type {
 }
 
 func (m *MusicServer) Remove(sess *djbot.Session, rang stypes.Range) {
-	for i := rang.Start; i < rang.End; i++ {
-
+	for i := rang.End; i >= rang.Start; i-- {
+		if sess.IsAdmin() || sess.UserID == m.Songs[i].RequesterID {
+			m.RemoveSong(i)
+		}
 	}
 }

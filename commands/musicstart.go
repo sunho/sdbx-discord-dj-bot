@@ -127,12 +127,14 @@ func (m *MusicServer) Start(sess *djbot.Session) {
 		if len(m.Songs) == 0 {
 			break
 		}
-		song := m.Songs[0]
+		index := 0
 		if sess.GetEnvServer().GetEnv(envs.RANDOMPICK).(bool) {
-			song = m.Songs[rand.Intn(len(m.Songs))]
+			index = rand.Intn(len(m.Songs))
 		}
+		song := m.Songs[index]
+		msg.PlayingMsg([]string{song.Name, song.Type, song.Duration.String(), song.Thumbnail, song.Requester}, sess.UserID, sess.ChannelID, sess.Session)
 		m.Current = song
-		m.RemoveSong(song)
+		m.RemoveSong(index)
 		m.PlayOne(sess, song)
 	}
 	m.Current = nil

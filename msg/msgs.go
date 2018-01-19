@@ -43,6 +43,26 @@ func ListMsg(list []string, userid string, channel string, sess *discordgo.Sessi
 	sess.ChannelMessageSendEmbed(channel, embed)
 }
 
+func QueueMsg(current string, list []string, userid string, channel string, sess *discordgo.Session) {
+	usr, _ := sess.User(userid)
+	str := ""
+	if current != "" {
+		str += current + "\n"
+	}
+	for i := 0; i < len(list); i++ {
+		str += fmt.Sprintf("%d%s\n", i, list[i])
+	}
+	embed := &discordgo.MessageEmbed{
+		Description: str,
+		Color:       0xffff00,
+		Footer: &discordgo.MessageEmbedFooter{
+			IconURL: usr.AvatarURL(""),
+			Text:    usr.Username,
+		},
+	}
+	sess.ChannelMessageSendEmbed(channel, embed)
+}
+
 type LabeledList [][]string
 
 func (list LabeledList) Len() int {
@@ -106,6 +126,42 @@ func AddedToQueue(song []string, position int, userid string, channel string, se
 		Footer: &discordgo.MessageEmbedFooter{
 			IconURL: usr.AvatarURL(""),
 			Text:    usr.Username,
+		},
+		Thumbnail: &discordgo.MessageEmbedThumbnail{
+			URL: song[3],
+		},
+	}
+	sess.ChannelMessageSendEmbed(channel, eb)
+}
+
+func PlayingMsg(song []string, userid string, channel string, sess *discordgo.Session) {
+	usr, _ := sess.User(userid)
+	eb := &discordgo.MessageEmbed{
+		Title:       song[0],
+		Description: "The song is playing now.",
+		Fields: []*discordgo.MessageEmbedField{
+			{
+				Name:  "type",
+				Value: song[1],
+			},
+			{
+				Name:   "length",
+				Value:  song[2],
+				Inline: true,
+			},
+			{
+				Name:   "requester",
+				Value:  song[4],
+				Inline: true,
+			},
+		},
+		Color: 0xffff00,
+		Footer: &discordgo.MessageEmbedFooter{
+			IconURL: usr.AvatarURL(""),
+			Text:    usr.Username,
+		},
+		Thumbnail: &discordgo.MessageEmbedThumbnail{
+			URL: song[3],
 		},
 	}
 	sess.ChannelMessageSendEmbed(channel, eb)
