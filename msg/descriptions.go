@@ -26,4 +26,5 @@ const (
 	DescriptionMusicDisconnect = "*관리자용*DJ봇을 보이스 채널에서 나가게합니다"
 	DescriptionMusicRemove     = "음악큐의 음악을 삭제합니다 (인덱스)"
 	DescriptionMusicRRemove    = "음악큐의 음악들을 삭제합니다 (시작인덱스~끝인덱스)"
+	DescriptionSource          = "DJ봇의 깃허브 저장소 링크를 뿜습니다"
 )

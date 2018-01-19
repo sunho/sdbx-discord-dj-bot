@@ -41,7 +41,6 @@ func (dj *DJBot) HandleNewMessage(s *discordgo.Session, msgc *discordgo.MessageC
 			if !sess.IsAdmin() {
 				return
 			}
-			sess.Send(msg.HentaiChannel)
 		} else if ch2 != "" {
 			if !strings.HasPrefix(msgc.Content, dj.CommandMannager.Starter) {
 				_, err := strconv.Atoi(msgc.Content)
