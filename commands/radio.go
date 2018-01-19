@@ -3,10 +3,19 @@ package commands
 import (
 	"encoding/json"
 	"io/ioutil"
+	"math/rand"
 
 	djbot "github.com/ksunhokim123/sdbx-discord-dj-bot"
 	"github.com/ksunhokim123/sdbx-discord-dj-bot/msg"
 )
+
+func NewRadio() *Radio {
+	return &Radio{
+		Songs:           make(map[string][]*Song),
+		Categories:      []string{},
+		PlayingCategory: make(map[string]string),
+	}
+}
 
 type Radio struct {
 	Songs            map[string][]*Song
@@ -37,20 +46,20 @@ func (r *Radio) Load(filename string) {
 	}
 }
 
-func NewRadio() *Radio {
-	return &Radio{
-		Songs:           make(map[string][]*Song),
-		Categories:      []string{},
-		PlayingCategory: make(map[string]string),
-	}
-}
-
 func (r *Radio) Add(sess *djbot.Session, category string, song *Song) {
 	if r.IsCategory(category) {
 		r.Songs[category] = append(r.Songs[category], song)
 		return
 	}
 	sess.Send(msg.NoCategory)
+}
+
+func (r *Radio) GetSong(sess *djbot.Session) *Song {
+	songs := r.Songs[r.PlayingCategory[sess.ServerID]]
+	if len(songs) == 0 {
+		return nil
+	}
+	return songs[rand.Intn(len(songs))]
 }
 
 func (r *Radio) IsCategory(category string) bool {

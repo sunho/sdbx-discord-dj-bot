@@ -14,6 +14,7 @@ type DJBot struct {
 	YoutubeToken     string
 	Discord          *discordgo.Session
 	RequestManager   *RequestManager
+	BotOwnerID       string
 }
 
 func NewFromToken(token string, starter string) (*DJBot, error) {

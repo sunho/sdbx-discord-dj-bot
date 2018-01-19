@@ -13,7 +13,11 @@ type MusicRangeRemove struct {
 func (mc *MusicRangeRemove) Handle(sess *djbot.Session, parms []interface{}) {
 	rang := parms[0].(stypes.Range)
 	server := mc.Music.GetServer(sess.ServerID)
-	if 0 > rang.Start && rang.End <= len(server.Songs) {
+	if len(server.Songs) == 0 {
+		sess.Send(msg.OutOfRange)
+		return
+	}
+	if 0 > rang.Start && rang.Start <= len(server.Songs) && rang.End <= len(server.Songs) && 0 > rang.End {
 		sess.Send(msg.OutOfRange)
 		return
 	}

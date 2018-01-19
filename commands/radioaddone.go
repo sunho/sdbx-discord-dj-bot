@@ -1,4 +1,4 @@
 package commands
 
-type RadioAdd struct {
+type RadioAddOne struct {
 }

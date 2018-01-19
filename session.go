@@ -44,8 +44,7 @@ func (sess *Session) GetRoles() []string {
 }
 
 func (sess *Session) IsAdmin() bool {
-	//return (sess.GetPermission() & discordgo.PermissionAdministrator) != 0
-	return sess.UserID == "243721566687330306" || (sess.GetPermission()&discordgo.PermissionAdministrator) != 0
+	return sess.UserID == sess.DJBot.BotOwnerID || (sess.GetPermission()&discordgo.PermissionAdministrator) != 0
 }
 
 func (sess *Session) IsDJ() bool {
