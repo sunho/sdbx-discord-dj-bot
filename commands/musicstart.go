@@ -125,7 +125,9 @@ func (m *MusicServer) Start(sess *djbot.Session) {
 			break
 		}
 		if len(m.Songs) == 0 {
-			break
+			if sess.GetEnvServer().GetEnv(envs.RADIOMOD).(bool) {
+				m.AddSong(sess, m.Music.Radio.GetSong(sess))
+			}
 		}
 		index := 0
 		if sess.GetEnvServer().GetEnv(envs.RANDOMPICK).(bool) {

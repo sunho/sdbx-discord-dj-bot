@@ -54,11 +54,13 @@ type MusicServer struct {
 	SkipVotes      map[string]bool
 	TargetSkipVote int
 	Disconnected   bool
+	Music          *Music
 	Current        *Song
 }
 
 type Music struct {
 	sync.Mutex
+	Radio   *Radio
 	Servers map[string]*MusicServer
 }
 
@@ -76,6 +78,7 @@ func (m *Music) InitializeServer(ID string) {
 			ControlChan: make(chan MusicControl),
 			Songs:       []*Song{},
 			SkipVotes:   nil,
+			Music:       m,
 		}
 	}
 	m.Unlock()

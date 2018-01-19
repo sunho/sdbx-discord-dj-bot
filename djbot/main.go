@@ -19,11 +19,12 @@ import (
 
 var initial = flag.Bool("initial", false, "Make a tokens.json")
 
-func save(bb *djbot.DJBot) {
+func save(bb *djbot.DJBot, radio *commands.Radio) {
 	t := time.NewTicker(time.Minute)
 	for {
 		<-t.C
 		bb.EnvManager.Save("configs.json")
+		radio.Save("radio.json")
 	}
 }
 
@@ -66,14 +67,26 @@ func main() {
 	bb.EnvManager.MakeDefaultEnv(envs.VOICECHANNELONLY, false)
 	bb.EnvManager.MakeDefaultEnv(envs.SKIPVOTE, true)
 	bb.EnvManager.MakeDefaultEnv(envs.RANDOMPICK, true)
+	bb.EnvManager.MakeDefaultEnv(envs.RADIOMOD, true)
 	bb.EnvManager.Update()
 	music := commands.NewMusic()
-	admin := djbot.NewFamilyCommand("admin")
+	admin := djbot.NewFamilyCommand("관리 관련")
+	radioc := djbot.NewFamilyCommand("라디오 관련")
+	radio := commands.NewRadio()
+	music.Radio = radio
+	radio.Load("radio.json")
+	radioc.Commands["cat"] = &commands.RadioCategorySet{radio}
+	radioc.Commands["addcat"] = &commands.RadioCategoryAdd{radio}
+	radioc.Commands["getcat"] = &commands.RadioCategoryGet{radio}
+	radioc.Commands["addlist"] = &commands.RadioAddList{radio}
+	radioc.Commands["addone"] = &commands.RadioAddOne{radio}
+	radioc.Commands["play"] = &commands.RadioPlay{radio, music}
 	admin.Commands["chid"] = &commands.ChannelView{}
 	admin.Commands["envset"] = &commands.EnvSet{}
 	admin.Commands["envget"] = &commands.EnvGet{}
 	admin.Commands["disconnect"] = &commands.EnvGet{}
 	admin.Commands["fskip"] = &commands.EnvGet{}
+	bb.CommandMannager.Commands["radio"] = radioc
 	bb.CommandMannager.Commands["admin"] = admin
 	bb.CommandMannager.Commands["s"] = &commands.MusicSkip{music}
 	bb.CommandMannager.Commands["p"] = &commands.MusicAdd{music}
@@ -82,10 +95,11 @@ func main() {
 	bb.CommandMannager.Commands["q"] = &commands.MusicQueue{music}
 	bb.CommandMannager.Commands["remove"] = &commands.MusicRemove{music}
 	bb.CommandMannager.Commands["rremove"] = &commands.MusicRangeRemove{music}
+	bb.CommandMannager.Commands["list"] = &commands.RadioCategorySet{radio}
 	bb.CommandMannager.Commands["c"] = &commands.VoiceConnect{}
 	bb.CommandMannager.Commands["go"] = &commands.GOISAWESOME{}
 	bb.CommandMannager.Commands["source"] = &commands.Source{}
-	go save(bb)
+	go save(bb, radio)
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc

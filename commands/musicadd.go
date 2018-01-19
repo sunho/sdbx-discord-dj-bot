@@ -40,17 +40,24 @@ func (m *MusicServer) AddSong(sess *djbot.Session, song *Song) {
 	}
 }
 
-func (m *MusicServer) Add(sess *djbot.Session, url string) {
+func GetSongFromURL(sess *djbot.Session, url string) *Song {
 	r := regexp.MustCompile(`(youtu\.be\/|youtube\.com\/(watch\?(.*&)?v=|(embed|v)\/))([^\?&"'>]+)`)
 	matched := r.FindStringSubmatch(url)
 	if len(matched) != 6 {
-		return
+		return nil
 	}
 	id := matched[5]
 	songs, err := GetSongs(sess, []string{id})
 	if err != nil {
 		sess.Send(err)
+		return nil
+	}
+	return songs[0]
+}
+func (m *MusicServer) Add(sess *djbot.Session, url string) {
+	song := GetSongFromURL(sess, url)
+	if song == nil {
 		return
 	}
-	m.AddSong(sess, songs[0])
+	m.AddSong(sess, song)
 }

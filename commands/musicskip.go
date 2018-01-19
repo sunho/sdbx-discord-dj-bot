@@ -38,12 +38,13 @@ func (m *MusicServer) SkipVote(sess *djbot.Session, recipentn int) bool {
 	if recipentn <= 2 || !option.(bool) {
 		return true
 	}
-
+	if m.Current.RequesterID == "BOT" || m.Current.RequesterID == sess.UserID {
+		return true
+	}
 	if m.SkipVotes == nil {
 		m.SkipVotes = make(map[string]bool)
 		m.TargetSkipVote = (recipentn-1)/2 + 1
 	}
-
 	if _, ok := m.SkipVotes[sess.UserID]; !ok {
 		m.SkipVotes[sess.UserID] = true
 		sess.Send(msg.Voted, len(m.SkipVotes), "/", m.TargetSkipVote)
