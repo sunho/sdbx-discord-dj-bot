@@ -3,7 +3,6 @@ package commands
 import (
 	"bufio"
 	"encoding/binary"
-	"io"
 	"math/rand"
 	"os/exec"
 
@@ -29,24 +28,28 @@ func (vc *MusicStart) Types() []stypes.Type {
 	return []stypes.Type{}
 }
 
-func makeReader(sess *djbot.Session, url string) (io.Reader, error) {
+func (m *MusicServer) PlayOne(sess *djbot.Session, song *Song) {
+	url := song.Url
 	ytdl := exec.Command("./youtube-dl", "-v", "-f", "bestaudio", "-o", "-", url)
 	ytdlout, err := ytdl.StdoutPipe()
 	if err != nil {
-		return nil, err
+		sess.Send(err)
+		return
 	}
 	ffmpeg := exec.Command("./ffmpeg", "-i", "pipe:0", "-f", "s16le", "-ar", "48000", "-ac", "2", "pipe:1")
 	ffmpegout, err := ffmpeg.StdoutPipe()
 	ffmpeg.Stdin = ytdlout
 	if err != nil {
-		return nil, err
+		sess.Send(err)
+		return
 	}
 	ffmpegbuf := bufio.NewReaderSize(ffmpegout, 16384)
 	dca := exec.Command("./dca")
 	dca.Stdin = ffmpegbuf
 	dcaout, err := dca.StdoutPipe()
 	if err != nil {
-		return nil, err
+		sess.Send(err)
+		return
 	}
 	defer func() {
 		go dca.Wait()
@@ -54,7 +57,8 @@ func makeReader(sess *djbot.Session, url string) (io.Reader, error) {
 	dcabuf := bufio.NewReaderSize(dcaout, 16384)
 	err = ytdl.Start()
 	if err != nil {
-		return nil, err
+		sess.Send(err)
+		return
 	}
 	defer func() {
 		go ytdl.Wait()
@@ -65,21 +69,18 @@ func makeReader(sess *djbot.Session, url string) (io.Reader, error) {
 		go ffmpeg.Wait()
 	}()
 	if err != nil {
-		return nil, err
+		sess.Send(err)
+		return
 	}
 
 	err = dca.Start()
 	if err != nil {
-		return nil, err
+		sess.Send(err)
+		return
 	}
 	defer func() {
 		go dca.Wait()
 	}()
-	return dcabuf, nil
-}
-
-func (m *MusicServer) PlayOne(sess *djbot.Session, song *Song) {
-	dcabuf, err := makeReader(sess, song.Url)
 	if err != nil {
 		sess.Send(err)
 		return
@@ -89,6 +90,8 @@ func (m *MusicServer) PlayOne(sess *djbot.Session, song *Song) {
 	}
 	var opuslen int16
 	done := true
+	sess.VoiceConnection.Speaking(true)
+	defer sess.VoiceConnection.Speaking(false)
 	for done {
 		select {
 		case control := <-m.ControlChan:
@@ -108,10 +111,6 @@ func (m *MusicServer) PlayOne(sess *djbot.Session, song *Song) {
 			opus := make([]byte, opuslen)
 			err = binary.Read(dcabuf, binary.LittleEndian, &opus)
 			if err != nil {
-				done = false
-				break
-			}
-			if sess.VoiceConnection == nil {
 				done = false
 				break
 			}
@@ -143,6 +142,7 @@ func (m *MusicServer) Start(sess *djbot.Session) {
 		if sess.GetEnvServer().GetEnv(envs.RANDOMPICK).(bool) {
 			index = rand.Intn(len(m.Songs))
 		}
+		m.Music.Radio.AddRecommend(m.Songs[index])
 		song := m.Songs[index]
 		msg.PlayingMsg([]string{song.Name, song.Type, song.Duration.String(), song.Thumbnail, song.Requester}, sess.UserID, sess.ChannelID, sess.Session)
 		m.Current = song
