@@ -1,10 +1,10 @@
 package commands
 
 import (
-	"bufio"
-	"encoding/binary"
 	"math/rand"
 	"os/exec"
+
+	"github.com/bwmarrin/dgvoice"
 
 	djbot "github.com/ksunhokim123/sdbx-discord-dj-bot"
 	"github.com/ksunhokim123/sdbx-discord-dj-bot/envs"
@@ -30,93 +30,20 @@ func (vc *MusicStart) Types() []stypes.Type {
 
 func (m *MusicServer) PlayOne(sess *djbot.Session, song *Song) {
 	url := song.Url
-	ytdl := exec.Command("./youtube-dl", "-v", "-f", "bestaudio", "-o", "-", url)
-	ytdlout, err := ytdl.StdoutPipe()
+	ytdl := exec.Command("./youtube-dl", "-v", "-f", "bestaudio", "-o", "playing.aac", url)
+	err := ytdl.Start()
 	if err != nil {
 		sess.Send(err)
 		return
 	}
-	ffmpeg := exec.Command("./ffmpeg", "-i", "pipe:0", "-f", "s16le", "-ar", "48000", "-ac", "2", "pipe:1")
-	ffmpegout, err := ffmpeg.StdoutPipe()
-	ffmpeg.Stdin = ytdlout
+	ytdl.Wait()
 	if err != nil {
 		sess.Send(err)
 		return
 	}
-	ffmpegbuf := bufio.NewReaderSize(ffmpegout, 16384)
-	dca := exec.Command("./dca")
-	dca.Stdin = ffmpegbuf
-	dcaout, err := dca.StdoutPipe()
-	if err != nil {
-		sess.Send(err)
-		return
-	}
-	defer func() {
-		go dca.Wait()
-	}()
-	dcabuf := bufio.NewReaderSize(dcaout, 16384)
-	err = ytdl.Start()
-	if err != nil {
-		sess.Send(err)
-		return
-	}
-	defer func() {
-		go ytdl.Wait()
-	}()
-
-	err = ffmpeg.Start()
-	defer func() {
-		go ffmpeg.Wait()
-	}()
-	if err != nil {
-		sess.Send(err)
-		return
-	}
-
-	err = dca.Start()
-	if err != nil {
-		sess.Send(err)
-		return
-	}
-	defer func() {
-		go dca.Wait()
-	}()
-	if err != nil {
-		sess.Send(err)
-		return
-	}
-	if dcabuf == nil {
-		return
-	}
-	var opuslen int16
-	done := true
-	sess.VoiceConnection.Speaking(true)
-	defer sess.VoiceConnection.Speaking(false)
-	for done {
-		select {
-		case control := <-m.ControlChan:
-			switch control {
-			case ControlSkip:
-				done = false
-			case ControlDisconnect:
-				done = false
-				sess.Disconnect()
-			}
-		default:
-			err = binary.Read(dcabuf, binary.LittleEndian, &opuslen)
-			if err != nil {
-				done = false
-				break
-			}
-			opus := make([]byte, opuslen)
-			err = binary.Read(dcabuf, binary.LittleEndian, &opus)
-			if err != nil {
-				done = false
-				break
-			}
-			sess.VoiceConnection.OpusSend <- opus
-		}
-	}
+	stop := make(chan bool)
+	dgvoice.PlayAudioFile(sess.VoiceConnection, "playing.aac", stop)
+	<-stop
 }
 
 func (m *MusicServer) Start(sess *djbot.Session) {
@@ -138,6 +65,7 @@ func (m *MusicServer) Start(sess *djbot.Session) {
 				m.AddSong(sess, m.Music.Radio.GetSong(sess))
 			}
 		}
+
 		index := 0
 		if sess.GetEnvServer().GetEnv(envs.RANDOMPICK).(bool) {
 			index = rand.Intn(len(m.Songs))
