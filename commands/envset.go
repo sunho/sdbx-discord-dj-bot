@@ -21,7 +21,9 @@ func (es *EnvSet) Handle(sess *djbot.Session, parms []interface{}) {
 	err := sess.GetEnvServer().SetEnvWithStr(parms[0].(string), vars)
 	if err != nil {
 		sess.Send(err)
+		return
 	}
+	sess.Send(msg.Success)
 }
 
 func (es *EnvSet) Description() string {

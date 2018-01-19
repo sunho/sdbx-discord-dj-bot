@@ -20,7 +20,7 @@ func (eg *EnvGet) Handle(sess *djbot.Session, parms []interface{}) {
 	for key, vars := range sess.GetEnvServer().Env {
 		list = append(list, []string{key, fmt.Sprint(vars.Var)})
 	}
-	msg.ListMsg2("Env list", list, sess.UserID, sess.ChannelID, sess.Session)
+	msg.LabeledListMsg("Env list", list, sess.UserID, sess.ChannelID, sess.Session)
 }
 
 func (eg *EnvGet) Description() string {

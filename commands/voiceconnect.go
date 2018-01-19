@@ -12,13 +12,12 @@ type VoiceConnect struct {
 }
 
 func (vc *VoiceConnect) Handle(sess *djbot.Session, parms []interface{}) {
-	if only, _ := sess.GetEnvServer().GetEnv(envs.CHANNELONLY); only.(bool) {
-		channel, err := sess.GetEnvServer().GetEnv("Channel")
-		if err == nil {
-			vc.Connect(sess, channel)
-			return
-		}
+	if sess.GetEnvServer().GetEnv(envs.VOICECHANNELONLY).(bool) {
+		channel := sess.GetEnvServer().GetEnv(envs.VOICECHANNEL)
+		vc.Connect(sess, channel)
+		return
 	}
+
 	gd, _ := sess.Guild(sess.ServerID)
 	slist := []string{}
 	dlist := []interface{}{}
@@ -28,6 +27,7 @@ func (vc *VoiceConnect) Handle(sess *djbot.Session, parms []interface{}) {
 			slist = append(slist, ch.Name)
 		}
 	}
+
 	sess.DJBot.RequestManager.Set(sess, &djbot.Request{
 		List:     slist,
 		DataList: dlist,
@@ -39,16 +39,16 @@ func (vc *VoiceConnect) Connect(sess *djbot.Session, id interface{}) {
 	if ok {
 		ch, err := sess.Channel(id.(string))
 		if err != nil {
-			sess.SendStr(msg.NoJustATrick)
+			sess.Send(msg.NoJustATrick)
 			return
 		}
 		if ch.Type != discordgo.ChannelTypeGuildVoice {
-			sess.SendStr(msg.NoJustATrick)
+			sess.Send(msg.NoJustATrick)
 			return
 		}
 		vc, err := sess.ChannelVoiceJoin(sess.ServerID, id2, false, true)
 		if err != nil {
-			sess.SendStr(msg.NoJustATrick)
+			sess.Send(msg.NoJustATrick)
 			return
 		}
 		sess.DJBot.VoiceConnections[sess.ServerID] = vc

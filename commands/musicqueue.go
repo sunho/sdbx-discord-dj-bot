@@ -10,15 +10,14 @@ type MusicQueue struct {
 	Music *Music
 }
 
-//TODO: replcae this into better one
+//TODO: place this to msg
 func (mc *MusicQueue) Handle(sess *djbot.Session, parms []interface{}) {
-	d := []string{}
+	list := []string{}
 	songs := mc.Music.GetServer(sess.ServerID).Songs
 	for i := 0; i < len(songs); i++ {
-		//usr, _ := sess.User(songs[i].Requester)
-		d = append(d, "`"+songs[i].Name+"`  **"+songs[i].Duration.String()+"**  Requested by ")
+		list = append(list, "`"+songs[i].Name+"`  **"+songs[i].Duration.String()+"**  Requested by "+songs[i].Requester)
 	}
-	msg.ListMsg(d, sess.UserID, sess.ChannelID, sess.Session)
+	msg.ListMsg(list, sess.UserID, sess.ChannelID, sess.Session)
 }
 
 func (vc *MusicQueue) Description() string {

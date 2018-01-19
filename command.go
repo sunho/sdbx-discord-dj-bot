@@ -4,7 +4,6 @@ import (
 	"os"
 	"strings"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/bwmarrin/discordgo"
 	"github.com/ksunhokim123/sdbx-discord-dj-bot/envs"
 	"github.com/ksunhokim123/sdbx-discord-dj-bot/msg"
@@ -31,7 +30,7 @@ func (h *help) Handle(sess *Session, parms []interface{}) {
 	for key, cmd := range h.fc.Commands {
 		strs = append(strs, []string{key, cmd.Description()})
 	}
-	msg.ListMsg2("Commands list", strs, sess.UserID, sess.ChannelID, sess.Session)
+	msg.LabeledListMsg("Commands list", strs, sess.UserID, sess.ChannelID, sess.Session)
 }
 
 func (h *help) Description() string {
@@ -85,7 +84,6 @@ type CommandMannager struct {
 func NewCommandManager(starter string) *CommandMannager {
 	fc := NewFamilyCommand("")
 	if len(starter) == 0 {
-		log.Error("no starter!")
 		os.Exit(0)
 	}
 	return &CommandMannager{

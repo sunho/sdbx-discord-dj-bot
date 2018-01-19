@@ -13,12 +13,8 @@ type MusicSkip struct {
 	Music *Music
 }
 
-//TODO: replcae this into better one
-func (mc *MusicSkip) Handle(sess *djbot.Session, parms []interface{}) {
-	if sess.VoiceConnection == nil {
-		return
-	}
-	server := mc.Music.GetServer(sess.ServerID)
+func (ms *MusicSkip) Handle(sess *djbot.Session, parms []interface{}) {
+	server := ms.Music.GetServer(sess.ServerID)
 	if server.State != Playing {
 		return
 	}
@@ -39,10 +35,7 @@ func (m *MusicServer) SkipVote(sess *djbot.Session, recipentn int) bool {
 	defer func() {
 		m.Unlock()
 	}()
-	option, err := sess.GetEnvServer().GetEnv(envs.SKIPVOTE)
-	if err != nil {
-		option = false
-	}
+	option := sess.GetEnvServer().GetEnv(envs.SKIPVOTE)
 
 	if recipentn <= 2 || !option.(bool) {
 		return true

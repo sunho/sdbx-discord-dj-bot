@@ -10,10 +10,10 @@ import (
 )
 
 const (
-	Voted    = "현재 곡 탄핵 투표"
-	Skipped  = "탄핵됨"
-	Envset   = "설정 변수 설정 완료"
-	Permiset = "권한 설정 완료"
+	Voted   = "현재 곡 탄핵 투표"
+	Skipped = "탄핵됨"
+	Envset  = "설정 변수 설정 완료"
+	Success = "작업성공"
 )
 
 func timeOutMsg(sess *discordgo.Session, chID string, msgID string, t time.Duration) {
@@ -43,21 +43,21 @@ func ListMsg(list []string, userid string, channel string, sess *discordgo.Sessi
 	sess.ChannelMessageSendEmbed(channel, embed)
 }
 
-type CmdList [][]string
+type LabeledList [][]string
 
-func (list CmdList) Len() int {
+func (list LabeledList) Len() int {
 	return len(list)
 }
 
-func (list CmdList) Swap(i, j int) {
+func (list LabeledList) Swap(i, j int) {
 	list[i], list[j] = list[j], list[i]
 }
 
-func (list CmdList) Less(i, j int) bool {
+func (list LabeledList) Less(i, j int) bool {
 	return list[i][0] < list[j][0]
 }
 
-func ListMsg2(name string, list CmdList, userid string, channel string, sess *discordgo.Session) {
+func LabeledListMsg(name string, list LabeledList, userid string, channel string, sess *discordgo.Session) {
 	usr, _ := sess.User(userid)
 	sort.Sort(list)
 	fields := []*discordgo.MessageEmbedField{}
@@ -109,8 +109,4 @@ func AddedToQueue(song []string, position int, userid string, channel string, se
 		},
 	}
 	sess.ChannelMessageSendEmbed(channel, eb)
-}
-
-func Success(description string, channel string, sess *discordgo.Session) {
-
 }

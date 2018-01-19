@@ -30,7 +30,7 @@ func (sess *Session) SendStr(str string) {
 }
 
 func (sess *Session) Send(args ...interface{}) {
-	sess.SendStr(fmt.Sprint(args))
+	sess.SendStr(fmt.Sprint(args...))
 }
 
 func (sess *Session) GetPermission() int {

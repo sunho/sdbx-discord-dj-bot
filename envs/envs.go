@@ -1,14 +1,14 @@
 package envs
 
 const (
-	CHANNELONLY    = "CertainChannelInputOnly"
-	VOICECHANNEL   = "VoiceChannel"
-	CERTAINCHANNEL = "CertainChannel"
-	RANDOMPICK     = "RandomPickQueue"
-	SKIPVOTE       = "VoteToSkip"
-	DJROLENAME     = "DJRoleName"
-	RADIOMOD       = "RadioWhenNoRequest"
-	MAXIMUMRADIO   = "MaximumRadio"
+	CHANNELONLY      = "CertainChannelInputOnly"
+	VOICECHANNELONLY = "ConnectToCertainVoiceChannelOnly"
+	CERTAINCHANNEL   = "CertainChannel"
+	VOICECHANNEL     = "VoiceChannel"
+	RANDOMPICK       = "RandomPickQueue"
+	SKIPVOTE         = "VoteToSkip"
+	RADIOMOD         = "RadioWhenNoRequest"
+	MAXIMUMRADIO     = "MaximumRadio"
 )
 
 const (

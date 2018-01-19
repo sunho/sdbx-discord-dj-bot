@@ -3,7 +3,9 @@ package djbot
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
+	"sync"
 
 	"github.com/ksunhokim123/sdbx-discord-dj-bot/msg"
 	"github.com/ksunhokim123/sdbx-discord-dj-bot/stypes"
@@ -19,13 +21,14 @@ type EnvVar struct {
 }
 
 type EnvServer struct {
+	sync.Mutex
 	Env map[string]EnvVar
 	ID  string
 }
 
 type EnvManager struct {
-	Servers         map[string]*EnvServer
-	UpdateFunctions []func()
+	sync.Mutex
+	Servers map[string]*EnvServer
 }
 
 func (envm *EnvManager) GetServer(serverID string) *EnvServer {
@@ -35,10 +38,7 @@ func (envm *EnvManager) GetServer(serverID string) *EnvServer {
 	return envm.Servers[serverID]
 }
 
-func (envm EnvManager) Save(filename string) {
-	for _, f := range envm.UpdateFunctions {
-		f()
-	}
+func (envm *EnvManager) Save(filename string) {
 	bytes, err := json.Marshal(envm)
 	if err != nil {
 		return
@@ -83,17 +83,21 @@ func (envm *EnvManager) Update() {
 }
 
 func (envm *EnvManager) copyDefaultEnv(serverID string) {
-	envm.Servers[serverID] = &EnvServer{make(map[string]EnvVar), serverID}
+	envm.Servers[serverID] = &EnvServer{
+		Env: make(map[string]EnvVar),
+		ID:  serverID,
+	}
 	for key, env := range envm.Servers["default"].Env {
 		envm.Servers[serverID].Env[key] = env
 	}
 }
 
-func (envs *EnvServer) GetEnv(key string) (interface{}, error) {
+func (envs *EnvServer) GetEnv(key string) interface{} {
 	if env, ok := envs.Env[key]; ok {
-		return env.Var, nil
+		return env.Var
 	}
-	return nil, e(msg.AcessUndefinedEnv)
+	fmt.Println(key, "doesn't exist.")
+	return nil
 }
 
 func (envm *EnvManager) MakeDefaultEnv(key string, value interface{}) {
@@ -131,5 +135,5 @@ func (envs *EnvServer) SetEnvWithInterface(key string, value interface{}) error 
 }
 
 func NewEnvManager() EnvManager {
-	return EnvManager{make(map[string]*EnvServer), []func(){}}
+	return EnvManager{make(map[string]*EnvServer)}
 }
