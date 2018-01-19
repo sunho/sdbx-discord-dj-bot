@@ -3,9 +3,12 @@ package commands
 import (
 	"bufio"
 	"encoding/binary"
+	"io"
+	"math/rand"
 	"os/exec"
 
 	djbot "github.com/ksunhokim123/sdbx-discord-dj-bot"
+	"github.com/ksunhokim123/sdbx-discord-dj-bot/envs"
 	"github.com/ksunhokim123/sdbx-discord-dj-bot/msg"
 	"github.com/ksunhokim123/sdbx-discord-dj-bot/stypes"
 )
@@ -26,20 +29,17 @@ func (vc *MusicStart) Types() []stypes.Type {
 	return []stypes.Type{}
 }
 
-func (m *MusicServer) PlayOne(sess *djbot.Session) {
-	url := m.Songs[0].Url
+func makeReader(sess *djbot.Session, url string) (io.Reader, error) {
 	ytdl := exec.Command("./youtube-dl", "-v", "-f", "bestaudio", "-o", "-", url)
 	ytdlout, err := ytdl.StdoutPipe()
 	if err != nil {
-		sess.Send(err)
-		return
+		return nil, err
 	}
 	ffmpeg := exec.Command("./ffmpeg", "-i", "pipe:0", "-f", "s16le", "-ar", "48000", "-ac", "2", "pipe:1")
 	ffmpegout, err := ffmpeg.StdoutPipe()
 	ffmpeg.Stdin = ytdlout
 	if err != nil {
-		sess.Send(err)
-		return
+		return nil, err
 	}
 	ffmpegbuf := bufio.NewReaderSize(ffmpegout, 16384)
 
@@ -47,44 +47,48 @@ func (m *MusicServer) PlayOne(sess *djbot.Session) {
 	dca.Stdin = ffmpegbuf
 	dcaout, err := dca.StdoutPipe()
 	if err != nil {
-		sess.Send(err)
-		return
+		return nil, err
 	}
 	dcabuf := bufio.NewReaderSize(dcaout, 16384)
 	err = ytdl.Start()
 	if err != nil {
-		sess.Send(err)
-		return
+		return nil, err
 	}
-	defer func() {
-		go ytdl.Wait()
-	}()
+
 	err = ffmpeg.Start()
 
 	if err != nil {
-		sess.Send(err)
-		return
+		return nil, err
 	}
-	defer func() {
-		go ffmpeg.Wait()
-	}()
 
 	err = dca.Start()
+	if err != nil {
+		return nil, err
+	}
+	return dcabuf, nil
+}
+
+func (m *MusicServer) PlayOne(sess *djbot.Session, song *Song) {
+	dcabuf, err := makeReader(sess, song.Url)
 	if err != nil {
 		sess.Send(err)
 		return
 	}
-	defer func() {
-		go dca.Wait()
-	}()
+	if dcabuf == nil {
+		return
+	}
 	var opuslen int16
-	sess.VoiceConnection.Speaking(true)
-	defer sess.VoiceConnection.Speaking(false)
 	done := true
 	for done {
 		select {
-		case <-m.SkipChan:
-			done = false
+		case control := <-m.ControlChan:
+			switch control {
+			case ControlSkip:
+				done = false
+			case ControlDisconnect:
+				done = false
+				sess.Disconnect()
+			}
 		default:
 			err = binary.Read(dcabuf, binary.LittleEndian, &opuslen)
 			if err != nil {
@@ -123,12 +127,14 @@ func (m *MusicServer) Start(sess *djbot.Session) {
 		if len(m.Songs) == 0 {
 			break
 		}
-		m.PlayOne(sess)
-		if len(m.Songs) != 0 {
-			m.Next()
-		} else {
-			break
+		song := m.Songs[0]
+		if sess.GetEnvServer().GetEnv(envs.RANDOMPICK).(bool) {
+			song = m.Songs[rand.Intn(len(m.Songs))]
 		}
+		m.Current = song
+		m.RemoveSong(song)
+		m.PlayOne(sess, song)
 	}
+	m.Current = nil
 	m.State = NotPlaying
 }

@@ -21,6 +21,8 @@ const (
 )
 
 type Range struct {
+	Start int
+	End   int
 }
 
 func GetType(in interface{}) Type {
@@ -76,6 +78,20 @@ func typeConvertOne(nstr []string, t Type) (interface{}, error) {
 		} else {
 			return nil, e(msg.TypesDontMatch)
 		}
+	case TypeRange:
+		arr := strings.Split(nstr[0], "~")
+		if len(arr) != 2 {
+			return nil, e(msg.TypesDontMatch)
+		}
+		start, err := strconv.Atoi(arr[0])
+		if err != nil {
+			return nil, e(msg.TypesDontMatch)
+		}
+		end, err := strconv.Atoi(arr[1])
+		if err != nil {
+			return nil, e(msg.TypesDontMatch)
+		}
+		return Range{start, end}, nil
 	default:
 		return nil, e(msg.UndefinedType)
 	}

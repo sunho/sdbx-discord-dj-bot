@@ -11,10 +11,10 @@ type Session struct {
 	ChannelID       string
 	ServerID        string
 	UserName        string
-	VoiceConnection *discordgo.VoiceConnection
 	DJBot           *DJBot
 	UserID          string
 	Msg             *discordgo.MessageCreate
+	VoiceConnection *discordgo.VoiceConnection
 	UserEnv         map[string]EnvVar
 }
 
@@ -50,4 +50,11 @@ func (sess *Session) IsAdmin() bool {
 func (sess *Session) IsDJ() bool {
 	fmt.Println(sess.GetRoles())
 	return false
+}
+
+func (sess *Session) Disconnect() {
+	sess.VoiceConnection.Disconnect()
+	sess.DJBot.Lock()
+	delete(sess.DJBot.VoiceConnections, sess.ServerID)
+	sess.DJBot.Unlock()
 }

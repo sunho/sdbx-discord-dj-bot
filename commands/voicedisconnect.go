@@ -7,6 +7,7 @@ import (
 )
 
 type VoiceDisconnect struct {
+	Music *Music
 }
 
 func (vc *VoiceDisconnect) Handle(sess *djbot.Session, parms []interface{}) {
@@ -18,8 +19,12 @@ func (vc *VoiceDisconnect) Handle(sess *djbot.Session, parms []interface{}) {
 		sess.Send(msg.WhyDisconnect)
 		return
 	}
-	sess.VoiceConnection.Disconnect()
-	sess.DJBot.VoiceConnections[sess.ServerID] = nil
+	server := vc.Music.GetServer(sess.ServerID)
+	if server.State == NotPlaying {
+		sess.Disconnect()
+		return
+	}
+	server.ControlChan <- ControlDisconnect
 }
 func (vc *VoiceDisconnect) Description() string {
 	return "this will make the bot connect to your voice channel"

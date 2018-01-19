@@ -30,7 +30,7 @@ func ListMsg(list []string, userid string, channel string, sess *discordgo.Sessi
 	usr, _ := sess.User(userid)
 	str := ""
 	for i := 0; i < len(list); i++ {
-		str += fmt.Sprintf("%d %s\n", i, list[i])
+		str += fmt.Sprintf("%d%s\n", i, list[i])
 	}
 	embed := &discordgo.MessageEmbed{
 		Description: str,

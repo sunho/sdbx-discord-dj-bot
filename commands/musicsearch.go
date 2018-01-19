@@ -1,14 +1,11 @@
 package commands
 
 import (
-	"net/http"
 	"strings"
 
-	"github.com/google/google-api-go-client/googleapi/transport"
 	djbot "github.com/ksunhokim123/sdbx-discord-dj-bot"
 	"github.com/ksunhokim123/sdbx-discord-dj-bot/msg"
 	"github.com/ksunhokim123/sdbx-discord-dj-bot/stypes"
-	youtube "google.golang.org/api/youtube/v3"
 )
 
 type MusicSearch struct {
@@ -29,11 +26,7 @@ func (vc *MusicSearch) Types() []stypes.Type {
 }
 
 func (m *MusicServer) Search(sess *djbot.Session, keywords string) {
-	client := &http.Client{
-		Transport: &transport.APIKey{Key: sess.DJBot.YoutubeToken},
-	}
-
-	service, err := youtube.New(client)
+	service, err := MakeYoutubeService(sess)
 	if err != nil {
 		sess.Send("youtube err", err)
 		return
@@ -55,11 +48,13 @@ func (m *MusicServer) Search(sess *djbot.Session, keywords string) {
 			slist = append(slist, items[i].Id.VideoId)
 		}
 	}
+
 	songs, err := GetSongs(sess, slist)
 	if err != nil {
 		sess.Send(err)
 		return
 	}
+
 	list := []string{}
 	dlist := []interface{}{}
 	for i := 0; i < len(songs); i++ {

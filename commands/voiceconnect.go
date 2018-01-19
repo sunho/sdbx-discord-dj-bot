@@ -51,7 +51,9 @@ func (vc *VoiceConnect) Connect(sess *djbot.Session, id interface{}) {
 			sess.Send(msg.NoJustATrick)
 			return
 		}
+		sess.DJBot.Lock()
 		sess.DJBot.VoiceConnections[sess.ServerID] = vc
+		sess.DJBot.Unlock()
 	}
 }
 func (vc *VoiceConnect) Description() string {

@@ -37,13 +37,23 @@ type Song struct {
 	Url         string
 }
 
+type MusicControl int
+
+const (
+	ControlNone MusicControl = iota
+	ControlSkip
+	ControlDisconnect
+)
+
 type MusicServer struct {
 	sync.Mutex
 	State          State
-	SkipChan       chan bool
+	ControlChan    chan MusicControl
 	Songs          []*Song
 	SkipVotes      map[string]bool
 	TargetSkipVote int
+	Disconnected   bool
+	Current        *Song
 }
 
 type Music struct {
@@ -62,9 +72,9 @@ func (m *Music) InitializeServer(ID string) {
 	m.Lock()
 	if _, ok := m.Servers[ID]; !ok {
 		m.Servers[ID] = &MusicServer{
-			SkipChan:  make(chan bool),
-			Songs:     []*Song{},
-			SkipVotes: nil,
+			ControlChan: make(chan MusicControl),
+			Songs:       []*Song{},
+			SkipVotes:   nil,
 		}
 	}
 	m.Unlock()
@@ -73,6 +83,15 @@ func (m *Music) InitializeServer(ID string) {
 func (m *Music) GetServer(ID string) *MusicServer {
 	m.InitializeServer(ID)
 	return m.Servers[ID]
+}
+
+func (m *MusicServer) RemoveSong(song *Song) {
+	for index, item := range m.Songs {
+		if item == song {
+			m.Songs = append(m.Songs[:index], m.Songs[index+1:]...)
+			return
+		}
+	}
 }
 
 func MakeYoutubeService(sess *djbot.Session) (*youtube.Service, error) {
@@ -84,6 +103,21 @@ func MakeYoutubeService(sess *djbot.Session) (*youtube.Service, error) {
 		return nil, err
 	}
 	return service, nil
+}
+
+func ParseDuration(str string) time.Duration {
+	r2 := regexp.MustCompile(`((\d{1,2})H)?((\d{1,2})M)?((\d{1,2})S)?`)
+	matched2 := r2.FindAllStringSubmatch(str, -1)
+	matched3 := matched2[len(matched2)-1]
+	if len(matched3) != 7 {
+		return 0
+	}
+	hour, _ := strconv.Atoi(matched3[2])
+	minute, _ := strconv.Atoi(matched3[4])
+	seconds, _ := strconv.Atoi(matched3[6])
+	dur := fmt.Sprintf("%dh%dm%ds", hour, minute, seconds)
+	dur2, _ := time.ParseDuration(dur)
+	return dur2
 }
 
 func GetSongs(sess *djbot.Session, ID []string) ([]*Song, error) {
@@ -124,25 +158,4 @@ func GetSongs(sess *djbot.Session, ID []string) ([]*Song, error) {
 	}
 
 	return songs, nil
-}
-
-func ParseDuration(str string) time.Duration {
-	r2 := regexp.MustCompile(`((\d{1,2})H)?((\d{1,2})M)?((\d{1,2})S)?`)
-	matched2 := r2.FindAllStringSubmatch(str, -1)
-	matched3 := matched2[len(matched2)-1]
-	if len(matched3) != 7 {
-		return 0
-	}
-	hour, _ := strconv.Atoi(matched3[2])
-	minute, _ := strconv.Atoi(matched3[4])
-	seconds, _ := strconv.Atoi(matched3[6])
-	dur := fmt.Sprintf("%dh%dm%ds", hour, minute, seconds)
-	dur2, _ := time.ParseDuration(dur)
-	return dur2
-}
-
-func (m *MusicServer) Next() {
-	m.Lock()
-	m.Songs = m.Songs[1:]
-	m.Unlock()
 }

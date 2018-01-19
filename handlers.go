@@ -18,7 +18,10 @@ func (dj *DJBot) HandleNewMessage(s *discordgo.Session, msgc *discordgo.MessageC
 	}
 	ch, _ := s.State.Channel(msgc.ChannelID)
 	gm, _ := s.GuildMember(ch.GuildID, msgc.Author.ID)
-
+	name := gm.Nick
+	if name == "" {
+		name = gm.User.Username
+	}
 	var sess = &Session{
 		Session:   s,
 		ChannelID: msgc.ChannelID,
@@ -26,9 +29,11 @@ func (dj *DJBot) HandleNewMessage(s *discordgo.Session, msgc *discordgo.MessageC
 		DJBot:     dj,
 		Msg:       msgc,
 		UserID:    msgc.Author.ID,
-		UserName:  gm.Nick,
+		UserName:  name,
 	}
-
+	if vc, ok := dj.VoiceConnections[sess.ServerID]; ok {
+		sess.VoiceConnection = vc
+	}
 	//TODO improve the structure
 	server := sess.GetEnvServer()
 	if server.GetEnv(envs.CHANNELONLY).(bool) == true {

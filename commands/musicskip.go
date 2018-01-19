@@ -1,8 +1,6 @@
 package commands
 
 import (
-	"fmt"
-
 	djbot "github.com/ksunhokim123/sdbx-discord-dj-bot"
 	"github.com/ksunhokim123/sdbx-discord-dj-bot/envs"
 	"github.com/ksunhokim123/sdbx-discord-dj-bot/msg"
@@ -26,7 +24,7 @@ func (ms *MusicSkip) Handle(sess *djbot.Session, parms []interface{}) {
 		}
 	}
 	if server.SkipVote(sess, recipentn) {
-		server.SkipChan <- true
+		server.ControlChan <- ControlSkip
 	}
 }
 
@@ -48,7 +46,7 @@ func (m *MusicServer) SkipVote(sess *djbot.Session, recipentn int) bool {
 
 	if _, ok := m.SkipVotes[sess.UserID]; !ok {
 		m.SkipVotes[sess.UserID] = true
-		sess.SendStr(fmt.Sprint(msg.Voted, len(m.SkipVotes), "/", m.TargetSkipVote))
+		sess.Send(msg.Voted, len(m.SkipVotes), "/", m.TargetSkipVote)
 	}
 
 	if len(m.SkipVotes) >= m.TargetSkipVote {

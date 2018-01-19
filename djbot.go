@@ -1,10 +1,13 @@
 package djbot
 
 import (
+	"sync"
+
 	"github.com/bwmarrin/discordgo"
 )
 
 type DJBot struct {
+	sync.Mutex
 	CommandMannager  *CommandMannager
 	EnvManager       EnvManager
 	VoiceConnections map[string]*discordgo.VoiceConnection
@@ -19,7 +22,10 @@ func NewFromToken(token string, starter string) (*DJBot, error) {
 		EnvManager:       NewEnvManager(),
 		VoiceConnections: make(map[string]*discordgo.VoiceConnection),
 	}
-	bb.EnvManager.Servers["default"] = &EnvServer{make(map[string]EnvVar), "default"}
+	bb.EnvManager.Servers["default"] = &EnvServer{
+		Env: make(map[string]EnvVar),
+		ID:  "default",
+	}
 	bb.RequestManager = &RequestManager{
 		Requests: make(map[string]*Request),
 	}

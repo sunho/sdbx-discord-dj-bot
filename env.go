@@ -83,6 +83,10 @@ func (envm *EnvManager) Update() {
 }
 
 func (envm *EnvManager) copyDefaultEnv(serverID string) {
+	envm.Lock()
+	defer func() {
+		envm.Unlock()
+	}()
 	envm.Servers[serverID] = &EnvServer{
 		Env: make(map[string]EnvVar),
 		ID:  serverID,
@@ -101,6 +105,10 @@ func (envs *EnvServer) GetEnv(key string) interface{} {
 }
 
 func (envm *EnvManager) MakeDefaultEnv(key string, value interface{}) {
+	envm.Lock()
+	defer func() {
+		envm.Unlock()
+	}()
 	defaultserver := envm.Servers["default"]
 	typ := stypes.GetType(value)
 	if typ == stypes.TypeOther {
@@ -110,6 +118,10 @@ func (envm *EnvManager) MakeDefaultEnv(key string, value interface{}) {
 }
 
 func (envs *EnvServer) SetEnvWithStr(key string, value string) error {
+	envs.Lock()
+	defer func() {
+		envs.Unlock()
+	}()
 	if env, ok := envs.Env[key]; ok {
 		convvalue, err := stypes.TypeConvertOne(value, env.Type)
 		if err != nil {
@@ -123,6 +135,10 @@ func (envs *EnvServer) SetEnvWithStr(key string, value string) error {
 }
 
 func (envs *EnvServer) SetEnvWithInterface(key string, value interface{}) error {
+	envs.Lock()
+	defer func() {
+		envs.Unlock()
+	}()
 	if env, ok := envs.Env[key]; ok {
 		if stypes.GetType(value) == env.Type {
 			envs.Env[key] = EnvVar{value, env.Type}
@@ -135,5 +151,7 @@ func (envs *EnvServer) SetEnvWithInterface(key string, value interface{}) error 
 }
 
 func NewEnvManager() EnvManager {
-	return EnvManager{make(map[string]*EnvServer)}
+	return EnvManager{
+		Servers: make(map[string]*EnvServer),
+	}
 }

@@ -15,7 +15,7 @@ func (mc *MusicFSkip) Handle(sess *djbot.Session, parms []interface{}) {
 		sess.Send(msg.NoPermission)
 		return
 	}
-	mc.Music.GetServer(sess.ServerID).SkipChan <- true
+	mc.Music.GetServer(sess.ServerID).ControlChan <- ControlSkip
 }
 
 func (vc *MusicFSkip) Description() string {
