@@ -61,6 +61,10 @@ func (r *Radio) Add(sess *djbot.Session, category string, song *Song) {
 	sess.Send(msg.NoCategory)
 }
 
+func (r *Radio) AddRecommend(song *Song) {
+	r.RecommendedSongs = append(r.RecommendedSongs, song)
+}
+
 func (r *Radio) GetSong(sess *djbot.Session) *Song {
 	category := r.PlayingCategory[sess.ServerID]
 	songs := r.Songs[category]
@@ -78,6 +82,7 @@ func (r *Radio) GetSong(sess *djbot.Session) *Song {
 	r.Unlock()
 	song := songs[r.Index[category]-1]
 	song.RequesterID = "BOT"
+	song.Requester = "BOT"
 	return song
 }
 

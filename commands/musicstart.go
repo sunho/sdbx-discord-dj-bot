@@ -42,21 +42,28 @@ func makeReader(sess *djbot.Session, url string) (io.Reader, error) {
 		return nil, err
 	}
 	ffmpegbuf := bufio.NewReaderSize(ffmpegout, 16384)
-
 	dca := exec.Command("./dca")
 	dca.Stdin = ffmpegbuf
 	dcaout, err := dca.StdoutPipe()
 	if err != nil {
 		return nil, err
 	}
+	defer func() {
+		go dca.Wait()
+	}()
 	dcabuf := bufio.NewReaderSize(dcaout, 16384)
 	err = ytdl.Start()
 	if err != nil {
 		return nil, err
 	}
+	defer func() {
+		go ytdl.Wait()
+	}()
 
 	err = ffmpeg.Start()
-
+	defer func() {
+		go ffmpeg.Wait()
+	}()
 	if err != nil {
 		return nil, err
 	}
@@ -65,6 +72,9 @@ func makeReader(sess *djbot.Session, url string) (io.Reader, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer func() {
+		go dca.Wait()
+	}()
 	return dcabuf, nil
 }
 

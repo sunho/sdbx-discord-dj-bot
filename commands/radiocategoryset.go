@@ -13,6 +13,7 @@ type RadioCategorySet struct {
 func (r *RadioCategorySet) Handle(sess *djbot.Session, parms []interface{}) {
 	category := parms[0].(string)
 	if r.Radio.IsCategory(category) {
+		r.Radio.Index[category] = 0
 		r.Radio.PlayingCategory[sess.ServerID] = category
 		sess.Send(msg.Success)
 	}
