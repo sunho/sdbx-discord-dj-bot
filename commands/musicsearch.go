@@ -66,7 +66,7 @@ func (m *MusicServer) Search(sess *djbot.Session, keywords string) {
 		List:     list,
 		DataList: dlist,
 		CallBack: func(s *djbot.Session, i interface{}) {
-			m.AddSong(s, i.(*Song))
+			m.AddSong(s, i.(*Song), true)
 		},
 	}
 	sess.DJBot.RequestManager.Set(sess, r)

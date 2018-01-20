@@ -25,19 +25,22 @@ func (mc *MusicAdd) Types() []stypes.Type {
 	return []stypes.Type{stypes.TypeString}
 }
 
-func (m *MusicServer) AddSong(sess *djbot.Session, song *Song) {
+func (m *MusicServer) AddSong(sess *djbot.Session, song *Song, notifi bool) error {
 	if song == nil {
-		return
+		return e(msg.NoJustATrick)
 	}
 	m.Lock()
 	m.Songs = append(m.Songs, song)
 	m.Unlock()
-	msg.AddedToQueue([]string{song.Name, song.Type, song.Duration.String(), song.Thumbnail}, len(m.Songs), sess.UserID, sess.ChannelID, sess.Session)
+	if notifi {
+		msg.AddedToQueue([]string{song.Name, song.Type, song.Duration.String(), song.Thumbnail}, len(m.Songs), sess.UserID, sess.ChannelID, sess.Session)
+	}
 	if sess.VoiceConnection != nil {
 		if m.State == NotPlaying {
 			m.Start(sess)
 		}
 	}
+	return nil
 }
 
 func GetSongFromURL(sess *djbot.Session, url string) *Song {
@@ -59,5 +62,5 @@ func (m *MusicServer) Add(sess *djbot.Session, url string) {
 	if song == nil {
 		return
 	}
-	m.AddSong(sess, song)
+	m.AddSong(sess, song, true)
 }

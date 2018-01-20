@@ -12,7 +12,7 @@ type RadioPlay struct {
 }
 
 func (r *RadioPlay) Handle(sess *djbot.Session, parms []interface{}) {
-	r.Music.GetServer(sess.ServerID).AddSong(sess, r.Radio.GetSong(sess))
+	r.Music.GetServer(sess.ServerID).AddSong(sess, r.Radio.GetSong(sess), true)
 }
 
 func (vc *RadioPlay) Description() string {

@@ -136,7 +136,12 @@ func (m *MusicServer) Start(sess *djbot.Session) {
 		index := 0
 		if len(m.Songs) == 0 {
 			if sess.GetEnvServer().GetEnv(envs.RADIOMOD).(bool) {
-				m.AddSong(sess, m.Music.Radio.GetSong(sess))
+				err := m.AddSong(sess, m.Music.Radio.GetSong(sess), false)
+				if err != nil {
+					continue
+				}
+			} else {
+				break
 			}
 		} else {
 			if sess.GetEnvServer().GetEnv(envs.RANDOMPICK).(bool) {
@@ -149,10 +154,10 @@ func (m *MusicServer) Start(sess *djbot.Session) {
 		}
 		m.SkipVotes = nil
 		m.TargetSkipVote = 0
-
-		m.Current = m.Songs[index]
+		song := m.Songs[index]
+		m.Current = song
 		m.RemoveSong(index)
-		m.PlayOne(sess, m.Songs[index])
+		m.PlayOne(sess, song)
 	}
 	m.Current = nil
 	m.State = NotPlaying
