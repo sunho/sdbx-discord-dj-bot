@@ -27,4 +27,10 @@ const (
 	DescriptionMusicRemove     = "음악큐의 음악을 삭제합니다 (인덱스)"
 	DescriptionMusicRRemove    = "음악큐의 음악들을 삭제합니다 (시작인덱스~끝인덱스)"
 	DescriptionSource          = "DJ봇의 깃허브 저장소 링크를 뿜습니다"
+	DescriptionRadioAddList    = "특정 라디오 카테고리에 재생목록의 음악 중 최대 15개를 추가합니다.(카테고리, 링크)"
+	DescriptionRadioAddOne     = "특정 라디오 카테고리에 음악 하나를 추가합니다.(카테고리, 링크)"
+	DescriptionRadioCatAdd     = "라디오 카테고리를 추가합니다 (카테고리)"
+	DescriptionRadioCatGet     = "라디오 카테고리를 뿜습니다"
+	DescriptionRadioCatSet     = "재생할 라디오의 카테고리를 설정합니다"
+	DescriptionRadioPlay       = "라디오에서 음악 하나를 큐에 추가시킵니다."
 )

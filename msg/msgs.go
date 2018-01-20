@@ -47,10 +47,10 @@ func QueueMsg(current string, list []string, userid string, channel string, sess
 	usr, _ := sess.User(userid)
 	str := ""
 	if current != "" {
-		str += current + "\n"
+		str += current + "\n\n"
 	}
 	for i := 0; i < len(list); i++ {
-		str += fmt.Sprintf("%d%s\n", i, list[i])
+		str += fmt.Sprintf("%d%s\n\n", i, list[i])
 	}
 	embed := &discordgo.MessageEmbed{
 		Description: str,

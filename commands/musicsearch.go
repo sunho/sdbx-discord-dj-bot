@@ -18,7 +18,7 @@ func (mc *MusicSearch) Handle(sess *djbot.Session, parms []interface{}) {
 }
 
 func (vc *MusicSearch) Description() string {
-	return msg.DescriptionMusicAdd
+	return msg.DescriptionMusicSearch
 }
 
 func (vc *MusicSearch) Types() []stypes.Type {

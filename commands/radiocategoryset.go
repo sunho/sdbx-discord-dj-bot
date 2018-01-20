@@ -20,7 +20,7 @@ func (r *RadioCategorySet) Handle(sess *djbot.Session, parms []interface{}) {
 }
 
 func (vc *RadioCategorySet) Description() string {
-	return msg.DescriptionMusicStart
+	return msg.DescriptionRadioCatSet
 }
 
 func (vc *RadioCategorySet) Types() []stypes.Type {

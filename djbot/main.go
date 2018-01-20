@@ -85,7 +85,7 @@ func main() {
 	admin.Commands["envset"] = &commands.EnvSet{}
 	admin.Commands["envget"] = &commands.EnvGet{}
 	admin.Commands["disconnect"] = &commands.VoiceDisconnect{}
-	admin.Commands["fskip"] = &commands.EnvGet{}
+	admin.Commands["fskip"] = &commands.MusicFSkip{music}
 	bb.CommandMannager.Commands["radio"] = radioc
 	bb.CommandMannager.Commands["admin"] = admin
 	bb.CommandMannager.Commands["s"] = &commands.MusicSkip{music}

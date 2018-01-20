@@ -51,8 +51,6 @@ func (m *MusicServer) SkipVote(sess *djbot.Session, recipentn int) bool {
 	}
 
 	if len(m.SkipVotes) >= m.TargetSkipVote {
-		m.SkipVotes = nil
-		m.TargetSkipVote = 0
 		return true
 	}
 

@@ -22,7 +22,7 @@ func (r *RadioAddOne) Handle(sess *djbot.Session, parms []interface{}) {
 }
 
 func (vc *RadioAddOne) Description() string {
-	return msg.DescriptionMusicStart
+	return msg.DescriptionRadioAddOne
 }
 
 func (vc *RadioAddOne) Types() []stypes.Type {

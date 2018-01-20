@@ -59,7 +59,7 @@ func (r *RadioAddList) Handle(sess *djbot.Session, parms []interface{}) {
 }
 
 func (vc *RadioAddList) Description() string {
-	return msg.DescriptionMusicStart
+	return msg.DescriptionRadioAddList
 }
 
 func (vc *RadioAddList) Types() []stypes.Type {

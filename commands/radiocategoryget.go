@@ -21,7 +21,7 @@ func (r *RadioCategoryGet) Handle(sess *djbot.Session, parms []interface{}) {
 }
 
 func (vc *RadioCategoryGet) Description() string {
-	return msg.DescriptionMusicStart
+	return msg.DescriptionRadioCatGet
 }
 
 func (vc *RadioCategoryGet) Types() []stypes.Type {

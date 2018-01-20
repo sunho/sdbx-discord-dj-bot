@@ -16,7 +16,7 @@ func (r *RadioPlay) Handle(sess *djbot.Session, parms []interface{}) {
 }
 
 func (vc *RadioPlay) Description() string {
-	return msg.DescriptionMusicStart
+	return msg.DescriptionRadioPlay
 }
 
 func (vc *RadioPlay) Types() []stypes.Type {
