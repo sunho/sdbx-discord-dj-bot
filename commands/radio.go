@@ -7,13 +7,16 @@ import (
 	"sync"
 
 	djbot "github.com/ksunhokim123/sdbx-discord-dj-bot"
-	"github.com/ksunhokim123/sdbx-discord-dj-bot/msg"
 )
+
+type RadioCategory struct {
+	Name  string
+	Songs []*Song
+}
 
 func NewRadio() *Radio {
 	return &Radio{
-		Songs:            make(map[string][]*Song),
-		Categories:       []string{},
+		Songs:            make(map[string]*RadioCategory),
 		PlayingCategory:  make(map[string]string),
 		Index:            make(map[string]int),
 		RecommendedSongs: []*Song{},
@@ -22,9 +25,8 @@ func NewRadio() *Radio {
 
 type Radio struct {
 	sync.Mutex
-	Songs            map[string][]*Song
+	Songs            map[string]*RadioCategory
 	RecommendedSongs []*Song
-	Categories       []string
 	PlayingCategory  map[string]string
 	Index            map[string]int
 }
@@ -51,23 +53,13 @@ func (r *Radio) Load(filename string) {
 	}
 }
 
-func (r *Radio) Add(sess *djbot.Session, category string, song *Song) {
-	if r.IsCategory(category) {
-		r.Lock()
-		r.Songs[category] = append(r.Songs[category], song)
-		r.Unlock()
-		return
-	}
-	sess.Send(msg.NoCategory)
-}
-
 func (r *Radio) AddRecommend(song *Song) {
 	r.RecommendedSongs = append(r.RecommendedSongs, song)
 }
 
 func (r *Radio) GetSong(sess *djbot.Session) *Song {
 	category := r.PlayingCategory[sess.ServerID]
-	songs := r.Songs[category]
+	songs := r.Songs[category].Songs
 	if len(songs) == 0 {
 		return nil
 	}
@@ -88,29 +80,25 @@ func (r *Radio) GetSong(sess *djbot.Session) *Song {
 
 func (r *Radio) Shuffle(category string) {
 	r.Lock()
+	songs := r.Songs[category].Songs
 	index := r.Index[category]
 	for i := 0; i < 100; i++ {
-		n := rand.Intn(len(r.Songs[category])-index) + index
-		n2 := rand.Intn(len(r.Songs[category])-index) + index
-		r.Songs[category][n], r.Songs[category][n2] = r.Songs[category][n2], r.Songs[category][n]
+		n := rand.Intn(len(songs)-index) + index
+		n2 := rand.Intn(len(songs)-index) + index
+		songs[n], songs[n2] = songs[n2], songs[n]
 	}
 	r.Unlock()
 }
 
 func (r *Radio) IsCategory(category string) bool {
-	for _, item := range r.Categories {
-		if item == category {
-			return true
-		}
+	if _, ok := r.Songs[category]; ok {
+		return true
 	}
 	return false
 }
 
-func (r *Radio) AddCategory(sess *djbot.Session, category string) {
+func (r *Radio) AddCategory(sess *djbot.Session, category string, name string) {
 	if !r.IsCategory(category) {
-		r.Categories = append(r.Categories, category)
-		sess.Send(msg.Success)
-	} else {
-		sess.Send(msg.NoCategory)
+		r.Songs[category] = &RadioCategory{name, []*Song{}}
 	}
 }

@@ -15,7 +15,7 @@ type RadioCategoryGet struct {
 func (r *RadioCategoryGet) Handle(sess *djbot.Session, parms []interface{}) {
 	list := []string{}
 	for key, item := range r.Radio.Songs {
-		list = append(list, fmt.Sprint("`"+key+"`", "항목수:", len(item)))
+		list = append(list, fmt.Sprint("`"+key+"`", item.Name, "항목수:", len(item.Songs)))
 	}
 	msg.ListMsg(list, sess.UserID, sess.ChannelID, sess.Session)
 }

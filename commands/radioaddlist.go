@@ -13,16 +13,8 @@ type RadioAddList struct {
 }
 
 func (r *RadioAddList) Handle(sess *djbot.Session, parms []interface{}) {
-	if !sess.IsAdmin() {
-		sess.Send(msg.NoPermission)
-		return
-	}
 	category := parms[0].(string)
 	url := parms[1].(string)
-	song := GetSongFromURL(sess, url)
-	if song == nil {
-		return
-	}
 	rg := regexp.MustCompile(`(youtu\.be\/|youtube\.com\/(watch\?(.*&)?list=))([^\?&"'>]+)`)
 	matched := rg.FindStringSubmatch(url)
 	if len(matched) != 5 {
@@ -34,9 +26,20 @@ func (r *RadioAddList) Handle(sess *djbot.Session, parms []interface{}) {
 		sess.Send(err)
 		return
 	}
+	call2 := service.Playlists.List("snippet")
+	call2.Id(id)
+	response2, err := call2.Do()
+	if err != nil {
+		sess.Send(err)
+		return
+	}
+	if len(response2.Items) != 1 {
+		return
+	}
+	title := response2.Items[0].Snippet.Title
 	call := service.PlaylistItems.List("contentDetails")
 	call = call.PlaylistId(id)
-	call = call.MaxResults(15)
+	call = call.MaxResults(50)
 	response, err := call.Do()
 	if err != nil {
 		sess.Send(err)
@@ -52,8 +55,12 @@ func (r *RadioAddList) Handle(sess *djbot.Session, parms []interface{}) {
 		sess.Send(err)
 		return
 	}
+	r.Radio.AddCategory(sess, category, title)
 	for _, item := range songs {
-		r.Radio.Add(sess, category, item)
+		r.Radio.Lock()
+		songs := r.Radio.Songs[category].Songs
+		r.Radio.Songs[category].Songs = append(songs, item)
+		r.Radio.Unlock()
 	}
 	sess.Send(msg.Success)
 }

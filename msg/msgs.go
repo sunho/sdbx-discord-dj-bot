@@ -119,7 +119,7 @@ func AddedToQueue(song []string, position int, userid string, channel string, se
 			},
 			{
 				Name:  "position",
-				Value: strconv.Itoa(position),
+				Value: strconv.Itoa(position - 1),
 			},
 		},
 		Color: 0xffff00,

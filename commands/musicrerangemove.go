@@ -17,7 +17,7 @@ func (mc *MusicRangeRemove) Handle(sess *djbot.Session, parms []interface{}) {
 		sess.Send(msg.OutOfRange)
 		return
 	}
-	if 0 > rang.Start && rang.Start <= len(server.Songs) && rang.End <= len(server.Songs) && 0 > rang.End {
+	if 0 > rang.Start && rang.Start < len(server.Songs) && rang.End < len(server.Songs) && 0 > rang.End {
 		sess.Send(msg.OutOfRange)
 		return
 	}

@@ -6,6 +6,9 @@ import (
 )
 
 func (dj *DJBot) HandleNewMessage(s *discordgo.Session, msgc *discordgo.MessageCreate) {
+	if msgc == nil || s == nil {
+		return
+	}
 	if msgc.Author.ID == s.State.User.ID {
 		return
 	}
