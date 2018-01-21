@@ -12,7 +12,6 @@ type VoiceDisconnect struct {
 
 func (vc *VoiceDisconnect) Handle(sess *djbot.Session, parms []interface{}) {
 	if sess.VoiceConnection == nil {
-		sess.Send(msg.WhyDisconnect)
 		return
 	}
 	server := vc.Music.GetServer(sess.ServerID)

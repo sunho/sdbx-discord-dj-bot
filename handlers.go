@@ -1,6 +1,7 @@
 package djbot
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
@@ -11,6 +12,11 @@ func (dj *DJBot) HandleNewMessage(s *discordgo.Session, msgc *discordgo.MessageC
 	if msgc == nil || s == nil {
 		return
 	}
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("recovered")
+		}
+	}()
 	if msgc.Author.ID == s.State.User.ID {
 		return
 	}
@@ -32,6 +38,7 @@ func (dj *DJBot) HandleNewMessage(s *discordgo.Session, msgc *discordgo.MessageC
 		UserID:    msgc.Author.ID,
 		UserName:  name,
 	}
+
 	if vc, ok := dj.VoiceConnections[sess.ServerID]; ok {
 		sess.VoiceConnection = vc
 	}
