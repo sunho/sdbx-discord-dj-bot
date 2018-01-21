@@ -1,6 +1,8 @@
 package djbot
 
 import (
+	"strings"
+
 	"github.com/bwmarrin/discordgo"
 	"github.com/ksunhokim123/sdbx-discord-dj-bot/envs"
 )
@@ -41,7 +43,12 @@ func (dj *DJBot) HandleNewMessage(s *discordgo.Session, msgc *discordgo.MessageC
 			}
 		}
 	}
-
+	if msgc.Content == "!join" {
+		dj.CommandMannager.Commands["disconnect"].Handle(sess, []interface{}{})
+	}
+	if strings.HasPrefix(msgc.Content, "!play") {
+		dj.CommandMannager.Commands["disconnect"].Handle(sess, []interface{}{})
+	}
 	if len(msgc.Content) != 0 {
 		/*go*/ dj.CommandMannager.HandleMessage(sess, msgc) // discord go already goed this (go eh.eventHandler.Handle(s, i))
 		/*go*/ dj.RequestManager.HandleMessage(sess, msgc)

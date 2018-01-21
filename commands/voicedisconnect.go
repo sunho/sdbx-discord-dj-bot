@@ -11,10 +11,6 @@ type VoiceDisconnect struct {
 }
 
 func (vc *VoiceDisconnect) Handle(sess *djbot.Session, parms []interface{}) {
-	if !sess.IsAdmin() {
-		sess.Send(msg.NoPermission)
-		return
-	}
 	if sess.VoiceConnection == nil {
 		sess.Send(msg.WhyDisconnect)
 		return
