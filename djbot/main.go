@@ -1,6 +1,5 @@
 package main
 
-//ㅁㄴㅇㄹ2
 import (
 	"flag"
 	"io/ioutil"
