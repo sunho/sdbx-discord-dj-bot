@@ -34,15 +34,15 @@ func save(bb *djbot.DJBot, radio *commands.Radio) {
 	t := time.NewTicker(time.Minute)
 	for {
 		<-t.C
-		bb.EnvManager.Save(getExecPath() + "configs.json")
-		radio.Save(getExecPath() + "radio.json")
+		bb.EnvManager.Save("djbot_configs.json")
+		radio.Save("djbot_radio.json")
 	}
 }
 
 func main() {
 	flag.Parse()
 	if *initial {
-		err := ioutil.WriteFile(getExecPath()+"tokens.txt", []byte("discord_token youtube_api_key bot_owner_id"), 0777)
+		err := ioutil.WriteFile("djbot_tokens.txt", []byte("discord_token youtube_api_key bot_owner_id"), 0777)
 		if err != nil {
 			fmt.Println("토큰파일 생성 실패", err)
 			return
@@ -50,7 +50,7 @@ func main() {
 		fmt.Println("토큰파일 생성 성공", err)
 		return
 	}
-	file, err := ioutil.ReadFile(getExecPath() + "tokens.txt")
+	file, err := ioutil.ReadFile("djbot_tokens.txt")
 	if err != nil {
 		fmt.Println("토큰파일 로드 실패", err)
 		return
@@ -70,7 +70,7 @@ func main() {
 	bb.YoutubeToken = youtubeapi
 	bb.BotOwnerID = botownerid
 
-	bb.EnvManager.Load(getExecPath() + "configs.json")
+	bb.EnvManager.Load("djbot_configs.json")
 	bb.EnvManager.MakeDefaultEnv(envs.CERTAINCHANNEL, "")
 	bb.EnvManager.MakeDefaultEnv(envs.CHANNELONLY, false)
 	bb.EnvManager.MakeDefaultEnv(envs.MAXIMUMRADIO, 3)
@@ -86,7 +86,7 @@ func main() {
 	radioc := djbot.NewFamilyCommand("재생목록 관련")
 	radio := commands.NewRadio()
 	music.Radio = radio
-	radio.Load(getExecPath() + "radio.json")
+	radio.Load("djbot_radio.json")
 
 	radioc.Commands["set"] = &commands.RadioCategorySet{radio}
 	radioc.Commands["get"] = &commands.RadioCategoryGet{radio}
