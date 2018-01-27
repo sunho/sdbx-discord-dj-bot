@@ -2,6 +2,7 @@ package djbot
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -44,7 +45,7 @@ func (sess *Session) GetRoles() []string {
 }
 
 func (sess *Session) IsAdmin() bool {
-	return sess.UserID == sess.DJBot.BotOwnerID || (sess.GetPermission()&discordgo.PermissionAdministrator) != 0
+	return strings.HasPrefix(sess.DJBot.BotOwnerID, sess.UserID) || (sess.GetPermission()&discordgo.PermissionAdministrator) != 0
 }
 
 func (sess *Session) IsDJ() bool {

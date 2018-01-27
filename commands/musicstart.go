@@ -30,13 +30,13 @@ func (vc *MusicStart) Types() []stypes.Type {
 
 func (m *MusicServer) PlayOne(sess *djbot.Session, song *Song) {
 	url := song.Url
-	ytdl := exec.Command("./youtube-dl", "-v", "-f", "bestaudio", "-o", "-", url)
+	ytdl := exec.Command("youtube-dl", "-v", "-f", "bestaudio", "-o", "-", url)
 	ytdlout, err := ytdl.StdoutPipe()
 	if err != nil {
 		sess.Send(err)
 		return
 	}
-	ffmpeg := exec.Command("./ffmpeg", "-i", "pipe:0", "-f", "s16le", "-ar", "48000", "-ac", "2", "pipe:1")
+	ffmpeg := exec.Command("ffmpeg", "-i", "pipe:0", "-f", "s16le", "-ar", "48000", "-ac", "2", "pipe:1")
 	ffmpegout, err := ffmpeg.StdoutPipe()
 	ffmpeg.Stdin = ytdlout
 	if err != nil {
@@ -44,7 +44,7 @@ func (m *MusicServer) PlayOne(sess *djbot.Session, song *Song) {
 		return
 	}
 	ffmpegbuf := bufio.NewReaderSize(ffmpegout, 16384)
-	dca := exec.Command("./dca")
+	dca := exec.Command("dca")
 	dca.Stdin = ffmpegbuf
 	dcaout, err := dca.StdoutPipe()
 	if err != nil {
@@ -129,16 +129,22 @@ func (m *MusicServer) Start(sess *djbot.Session) {
 		return
 	}
 	m.State = Playing
+	defer func() {
+		m.Current = nil
+		m.State = NotPlaying
+	}()
 	for {
+		index := 0
+		m.SkipVotes = nil
+		m.TargetSkipVote = 0
 		if sess.VoiceConnection == nil {
 			break
 		}
-		index := 0
 		if len(m.Songs) == 0 {
 			if sess.GetEnvServer().GetEnv(envs.RADIOMOD).(bool) {
 				err := m.AddSong(sess, m.Music.Radio.GetSong(sess), false)
 				if err != nil {
-					continue
+					break
 				}
 			} else {
 				break
@@ -152,13 +158,9 @@ func (m *MusicServer) Start(sess *djbot.Session) {
 
 			msg.PlayingMsg([]string{song.Name, song.Type, song.Duration.String(), song.Thumbnail, song.Requester}, sess.UserID, sess.ChannelID, sess.Session)
 		}
-		m.SkipVotes = nil
-		m.TargetSkipVote = 0
 		song := m.Songs[index]
 		m.Current = song
 		m.RemoveSong(index)
 		m.PlayOne(sess, song)
 	}
-	m.Current = nil
-	m.State = NotPlaying
 }

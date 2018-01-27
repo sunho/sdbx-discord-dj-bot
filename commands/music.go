@@ -17,6 +17,7 @@ import (
 	"github.com/ksunhokim123/sdbx-discord-dj-bot"
 )
 
+//TODO: seperate this from commands
 type State int
 
 func e(str string) error {

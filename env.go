@@ -43,7 +43,7 @@ func (envm *EnvManager) Save(filename string) {
 	if err != nil {
 		return
 	}
-	err = ioutil.WriteFile(filename, bytes, 0644)
+	err = ioutil.WriteFile(filename, bytes, 0777)
 	if err != nil {
 		return
 	}

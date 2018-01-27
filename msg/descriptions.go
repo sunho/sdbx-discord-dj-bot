@@ -23,7 +23,7 @@ const (
 	DescriptionEnvSet          = "*관리자용*특정 설정 변수를 변경합니다(변수이름,값)"
 	DescriptionEnvGet          = "*관리자용*모든 설정변수의 이름과 값을 뿜습니다"
 	DescriptionMusicFSkip      = "*관리자용*현재 재생중인 음악을 스킵시킵니다"
-	DescriptionMusicDisconnect = "*관리자용*DJ봇을 보이스 채널에서 나가게합니다"
+	DescriptionMusicDisconnect = "DJ봇을 보이스 채널에서 나가게합니다"
 	DescriptionMusicRemove     = "음악큐의 음악을 삭제합니다 (인덱스)"
 	DescriptionMusicRRemove    = "음악큐의 음악들을 삭제합니다 (시작인덱스~끝인덱스)"
 	DescriptionSource          = "DJ봇의 깃허브 저장소 링크를 뿜습니다"
