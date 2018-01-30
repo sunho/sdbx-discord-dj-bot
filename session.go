@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/ksunhokim123/sdbx-discord-dj-bot/msg"
+
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -48,14 +50,35 @@ func (sess *Session) IsAdmin() bool {
 	return strings.HasPrefix(sess.DJBot.BotOwnerID, sess.UserID) || (sess.GetPermission()&discordgo.PermissionAdministrator) != 0
 }
 
-func (sess *Session) IsDJ() bool {
-	fmt.Println(sess.GetRoles())
-	return false
-}
-
 func (sess *Session) Disconnect() {
+	if sess.VoiceConnection == nil {
+		return
+	}
 	sess.VoiceConnection.Disconnect()
 	sess.DJBot.Lock()
 	delete(sess.DJBot.VoiceConnections, sess.ServerID)
 	sess.DJBot.Unlock()
+}
+
+func (sess *Session) VoiceRecipent() int {
+	if sess.VoiceConnection == nil {
+		return 0
+	}
+
+	gd, _ := sess.State.Guild(sess.VoiceConnection.GuildID)
+	recipentn := 0
+	for _, vc := range gd.VoiceStates {
+		if vc.ChannelID == sess.VoiceConnection.ChannelID {
+			recipentn++
+		}
+	}
+	return recipentn
+}
+
+func (sess *Session) AdminCheck() bool {
+	if !sess.IsAdmin() {
+		sess.Send(msg.NoPermission)
+		return false
+	}
+	return true
 }

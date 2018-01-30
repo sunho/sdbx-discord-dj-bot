@@ -1,8 +1,6 @@
 package commands
 
 import (
-	"regexp"
-
 	djbot "github.com/ksunhokim123/sdbx-discord-dj-bot"
 	"github.com/ksunhokim123/sdbx-discord-dj-bot/msg"
 	"github.com/ksunhokim123/sdbx-discord-dj-bot/stypes"
@@ -23,44 +21,4 @@ func (mc *MusicAdd) Description() string {
 
 func (mc *MusicAdd) Types() []stypes.Type {
 	return []stypes.Type{stypes.TypeString}
-}
-
-func (m *MusicServer) AddSong(sess *djbot.Session, song *Song, notifi bool) error {
-	if song == nil {
-		return e(msg.NoJustATrick)
-	}
-	m.Lock()
-	m.Songs = append(m.Songs, song)
-	m.Unlock()
-	if notifi {
-		msg.AddedToQueue([]string{song.Name, song.Type, song.Duration.String(), song.Thumbnail}, len(m.Songs), sess.UserID, sess.ChannelID, sess.Session)
-	}
-	if sess.VoiceConnection != nil {
-		if m.State == NotPlaying {
-			m.Start(sess)
-		}
-	}
-	return nil
-}
-
-func GetSongFromURL(sess *djbot.Session, url string) *Song {
-	r := regexp.MustCompile(`(youtu\.be\/|youtube\.com\/(watch\?(.*&)?v=|(embed|v)\/))([^\?&"'>]+)`)
-	matched := r.FindStringSubmatch(url)
-	if len(matched) != 6 {
-		return nil
-	}
-	id := matched[5]
-	songs, err := GetSongs(sess, []string{id})
-	if err != nil {
-		sess.Send(err)
-		return nil
-	}
-	return songs[0]
-}
-func (m *MusicServer) Add(sess *djbot.Session, url string) {
-	song := GetSongFromURL(sess, url)
-	if song == nil {
-		return
-	}
-	m.AddSong(sess, song, true)
 }

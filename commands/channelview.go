@@ -11,10 +11,10 @@ type ChannelView struct {
 }
 
 func (cv *ChannelView) Handle(sess *djbot.Session, parms []interface{}) {
-	if !sess.IsAdmin() {
-		sess.Send(msg.NoPermission)
+	if !sess.AdminCheck() {
 		return
 	}
+
 	gd, _ := sess.Guild(sess.ServerID)
 	slist := []string{}
 	dlist := []interface{}{}
@@ -36,9 +36,7 @@ func (cv *ChannelView) Handle(sess *djbot.Session, parms []interface{}) {
 		CallBack: cv.Select,
 	})
 }
-func (cv *ChannelView) Select(sess *djbot.Session, id interface{}) {
-	sess.SendStr(id.(string))
-}
+
 func (cv *ChannelView) Description() string {
 	return msg.DescriptionChannelView
 }

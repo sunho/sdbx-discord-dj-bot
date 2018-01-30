@@ -1,0 +1,288 @@
+package commands
+
+import (
+	"bufio"
+	"encoding/binary"
+	"math/rand"
+	"os/exec"
+	"sync"
+
+	djbot "github.com/ksunhokim123/sdbx-discord-dj-bot"
+	"github.com/ksunhokim123/sdbx-discord-dj-bot/envs"
+	"github.com/ksunhokim123/sdbx-discord-dj-bot/msg"
+	"github.com/ksunhokim123/sdbx-discord-dj-bot/stypes"
+)
+
+type State int
+
+const (
+	NotPlaying State = iota
+	Playing
+)
+
+type MusicControl int
+
+const (
+	ControlNone MusicControl = iota
+	ControlSkip
+	ControlDisconnect
+)
+
+type MusicServer struct {
+	sync.Mutex
+	State          State
+	ControlChan    chan MusicControl
+	Songs          []*Song
+	SkipVotes      map[string]bool
+	TargetSkipVote int
+	Disconnected   bool
+	Music          *Music
+	Current        *Song
+}
+
+func (m *MusicServer) AddSong(sess *djbot.Session, song *Song, notifi bool) {
+	if song == nil {
+		sess.Send(msg.NoJustATrick)
+		return
+	}
+
+	m.Lock()
+	m.Songs = append(m.Songs, song)
+	m.Unlock()
+
+	if notifi {
+		msg.AddedToQueue([]string{song.Name, song.Type, song.Duration.String(), song.Thumbnail}, len(m.Songs), sess.UserID, sess.ChannelID, sess.Session)
+	}
+
+	if sess.VoiceConnection != nil {
+		if m.State == NotPlaying {
+			m.Start(sess)
+		}
+	}
+}
+
+func (m *MusicServer) Remove(sess *djbot.Session, rang stypes.Range) {
+	if len(server.Songs) == 0 {
+		sess.Send(msg.OutOfRange)
+		return
+	}
+	if 0 > rang.Start && rang.Start < len(server.Songs) && rang.End < len(server.Songs) && 0 > rang.End {
+		sess.Send(msg.OutOfRange)
+		return
+	}
+	for i := rang.End; i >= rang.Start; i-- {
+		if sess.IsAdmin() || sess.UserID == m.Songs[i].RequesterID {
+			m.RemoveSong(i)
+		}
+	}
+}
+
+func (m *MusicServer) RemoveSong(sess *djbot.Session, index int) {
+	if len(m.Songs) == 0 {
+		sess.Send(msg.OutOfRange)
+		return
+	}
+
+	if 0 > index && index < len(m.Songs) {
+		sess.Send(msg.OutOfRange)
+		return
+	}
+
+	m.Lock()
+	m.Songs = append(m.Songs[:index], m.Songs[index+1:]...)
+	m.Unlock()
+}
+
+func (m *MusicServer) SkipVote(sess *djbot.Session) (willskip bool) {
+	if m.State != Playing {
+		sess.Send(msg.NoJustATrick)
+		return false
+	}
+	m.Lock()
+	defer func() {
+		if willskip {
+			m.ControlChan <- ControlSkip
+		}
+		m.Unlock()
+	}()
+
+	option := sess.GetEnvServer().GetEnv(envs.SKIPVOTE)
+	recipent := sess.VoiceRecipent()
+	if recipent <= 2 || !option.(bool) {
+		return true
+	}
+	if m.Current.RequesterID == "BOT" || m.Current.RequesterID == sess.UserID {
+		return true
+	}
+
+	if m.SkipVotes == nil {
+		m.SkipVotes = make(map[string]bool)
+		m.TargetSkipVote = (recipent-1)/2 + 1
+	}
+
+	if _, ok := m.SkipVotes[sess.UserID]; !ok {
+		m.SkipVotes[sess.UserID] = true
+		sess.Send(msg.Voted, len(m.SkipVotes), "/", m.TargetSkipVote)
+	}
+
+	if len(m.SkipVotes) >= m.TargetSkipVote {
+		return true
+	}
+
+	return false
+}
+
+func (m *MusicServer) PlayOne(sess *djbot.Session, song *Song) {
+	url := song.Url
+	ytdl := exec.Command("youtube-dl", "-v", "-f", "bestaudio", "-o", "-", url)
+	ytdlout, err := ytdl.StdoutPipe()
+	if err != nil {
+		sess.Send(err)
+		return
+	}
+	ffmpeg := exec.Command("ffmpeg", "-i", "pipe:0", "-f", "s16le", "-ar", "48000", "-ac", "2", "pipe:1")
+	ffmpegout, err := ffmpeg.StdoutPipe()
+	ffmpeg.Stdin = ytdlout
+	if err != nil {
+		sess.Send(err)
+		return
+	}
+	ffmpegbuf := bufio.NewReaderSize(ffmpegout, 16384)
+	dca := exec.Command("dca")
+	dca.Stdin = ffmpegbuf
+	dcaout, err := dca.StdoutPipe()
+	if err != nil {
+		sess.Send(err)
+		return
+	}
+	defer func() {
+		go dca.Wait()
+	}()
+	dcabuf := bufio.NewReaderSize(dcaout, 16384)
+	err = ytdl.Start()
+	if err != nil {
+		sess.Send(err)
+		return
+	}
+	defer func() {
+		go ytdl.Wait()
+	}()
+
+	err = ffmpeg.Start()
+	defer func() {
+		go ffmpeg.Wait()
+	}()
+	if err != nil {
+		sess.Send(err)
+		return
+	}
+
+	err = dca.Start()
+	if err != nil {
+		sess.Send(err)
+		return
+	}
+	defer func() {
+		go dca.Wait()
+	}()
+	if err != nil {
+		sess.Send(err)
+		return
+	}
+	if dcabuf == nil {
+		return
+	}
+	var opuslen int16
+	done := true
+	sess.VoiceConnection.Speaking(true)
+	defer sess.VoiceConnection.Speaking(false)
+	for done {
+		select {
+		case control := <-m.ControlChan:
+			switch control {
+			case ControlSkip:
+				done = false
+			case ControlDisconnect:
+				done = false
+				sess.Disconnect()
+			}
+		default:
+			err = binary.Read(dcabuf, binary.LittleEndian, &opuslen)
+			if err != nil {
+				done = false
+				break
+			}
+			opus := make([]byte, opuslen)
+			err = binary.Read(dcabuf, binary.LittleEndian, &opus)
+			if err != nil {
+				done = false
+				break
+			}
+			sess.VoiceConnection.OpusSend <- opus
+		}
+	}
+}
+
+func (m *MusicServer) Start(sess *djbot.Session) {
+	if m.State == Playing {
+		return
+	}
+	if len(m.Songs) == 0 {
+		sess.Send(msg.NoQueue)
+		return
+	}
+	m.State = Playing
+	defer func() {
+		m.Current = nil
+		m.State = NotPlaying
+	}()
+	for {
+		index := 0
+		m.SkipVotes = nil
+		m.TargetSkipVote = 0
+		if sess.VoiceConnection == nil {
+			break
+		}
+		if len(m.Songs) == 0 {
+			if sess.GetEnvServer().GetEnv(envs.RADIOMOD).(bool) {
+				err := m.AddSong(sess, m.Music.Radio.GetSong(sess), false)
+				if err != nil {
+					break
+				}
+			} else {
+				break
+			}
+		} else {
+			if sess.GetEnvServer().GetEnv(envs.RANDOMPICK).(bool) {
+				index = rand.Intn(len(m.Songs))
+			}
+			song := m.Songs[index]
+			m.Music.Radio.AddRecommend(song)
+
+			msg.PlayingMsg([]string{song.Name, song.Type, song.Duration.String(), song.Thumbnail, song.Requester}, sess.UserID, sess.ChannelID, sess.Session)
+		}
+		song := m.Songs[index]
+		m.Current = song
+		m.RemoveSong(index)
+		m.PlayOne(sess, song)
+	}
+}
+
+func (m *MusicServer) Search(sess *djbot.Session, keywords string) {
+
+	list := []string{}
+	dlist := []interface{}{}
+	for i := 0; i < len(songs); i++ {
+		list = append(list, "`"+songs[i].Name+"` **"+songs[i].Duration.String()+"**")
+		dlist = append(dlist, songs[i])
+	}
+
+	r := &djbot.Request{
+		List:     list,
+		DataList: dlist,
+		CallBack: func(s *djbot.Session, i interface{}) {
+			m.AddSong(s, i.(*Song), true)
+		},
+	}
+	sess.DJBot.RequestManager.Set(sess, r)
+}

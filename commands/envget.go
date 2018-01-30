@@ -12,10 +12,10 @@ type EnvGet struct {
 }
 
 func (eg *EnvGet) Handle(sess *djbot.Session, parms []interface{}) {
-	if !sess.IsAdmin() {
-		sess.Send(msg.NoPermission)
+	if !sess.AdminCheck() {
 		return
 	}
+
 	list := [][]string{}
 	for key, vars := range sess.GetEnvServer().Env {
 		list = append(list, []string{key, fmt.Sprint(vars.Var)})

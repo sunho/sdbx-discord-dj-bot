@@ -6,12 +6,10 @@ import (
 	"io/ioutil"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"strings"
 	"syscall"
 	"time"
 
-	"github.com/kardianos/osext"
 	"github.com/ksunhokim123/sdbx-discord-dj-bot/envs"
 
 	"github.com/ksunhokim123/sdbx-discord-dj-bot/commands"
@@ -20,15 +18,6 @@ import (
 )
 
 var initial = flag.Bool("initial", false, "Make a tokens.json")
-
-func getExecPath() string {
-	fullexecpath, err := osext.Executable()
-	if err != nil {
-		return ""
-	}
-	dir, _ := filepath.Split(fullexecpath)
-	return dir
-}
 
 func save(bb *djbot.DJBot, radio *commands.Radio) {
 	t := time.NewTicker(time.Minute)
@@ -88,37 +77,41 @@ func main() {
 	music.Radio = radio
 	radio.Load("djbot_radio.json")
 
-	radioc.Commands["set"] = &commands.RadioCategorySet{radio}
-	radioc.Commands["get"] = &commands.RadioCategoryGet{radio}
-	radioc.Commands["addone"] = &commands.RadioAddOne{radio}
-	radioc.Commands["addlist"] = &commands.RadioAddList{radio}
-	radioc.Commands["list"] = &commands.RadioCategoryGetGet{radio}
-	radioc.Commands["play"] = &commands.RadioPlay{radio, music}
-	bb.CommandMannager.Commands["list"] = radioc
-
-	admin.Commands["chid"] = &commands.ChannelView{}
-	admin.Commands["envset"] = &commands.EnvSet{}
-	admin.Commands["envget"] = &commands.EnvGet{}
-	admin.Commands["fskip"] = &commands.MusicFSkip{music}
-	bb.CommandMannager.Commands["admin"] = admin
-
-	bb.CommandMannager.Commands["disconnect"] = &commands.VoiceDisconnect{music}
-	bb.CommandMannager.Commands["s"] = &commands.MusicSkip{music}
-	bb.CommandMannager.Commands["skip"] = &commands.MusicSkip{music}
-	bb.CommandMannager.Commands["p"] = &commands.MusicAdd{music}
-	bb.CommandMannager.Commands["play"] = &commands.MusicAdd{music}
-	bb.CommandMannager.Commands["search"] = &commands.MusicSearch{music}
-	bb.CommandMannager.Commands["find"] = &commands.MusicSearch{music}
-	bb.CommandMannager.Commands["start"] = &commands.MusicStart{music}
-	bb.CommandMannager.Commands["list"] = &commands.MusicQueue{music}
-	bb.CommandMannager.Commands["queue"] = &commands.MusicQueue{music}
-	bb.CommandMannager.Commands["q"] = &commands.MusicQueue{music}
-	bb.CommandMannager.Commands["remove"] = &commands.MusicRemove{music}
-	bb.CommandMannager.Commands["rremove"] = &commands.MusicRangeRemove{music}
-	bb.CommandMannager.Commands["connect"] = &commands.VoiceConnect{}
-	bb.CommandMannager.Commands["c"] = &commands.VoiceConnect{}
-	bb.CommandMannager.Commands["go"] = &commands.GOISAWESOME{}
-	bb.CommandMannager.Commands["source"] = &commands.Source{}
+	radioc.Commands = []djbot.Command{
+		"set":     &commands.RadioCategorySet{radio},
+		"get":     &commands.RadioCategoryGet{radio},
+		"addone":  &commands.RadioAddOne{radio},
+		"addlist": &commands.RadioAddList{radio},
+		"list":    &commands.RadioCategoryGetGet{radio},
+		"play":    &commands.RadioPlay{radio, music},
+	}
+	admin.Commands = []djbot.Command{
+		"chid":   &commands.ChannelView{},
+		"envset": &commands.EnvSet{},
+		"envget": &commands.EnvGet{},
+		"fskip":  &commands.MusicFSkip{music},
+	}
+	bb.CommandMannager.Commands = []djbot.Command{
+		"list":       radioc,
+		"admin":      admin,
+		"disconnect": &commands.VoiceDisconnect{music},
+		"s":          &commands.MusicSkip{music},
+		"skip":       &commands.MusicSkip{music},
+		"p":          &commands.MusicAdd{music},
+		"play":       &commands.MusicAdd{music},
+		"search":     &commands.MusicSearch{music},
+		"find":       &commands.MusicSearch{music},
+		"start":      &commands.MusicStart{music},
+		"list":       &commands.MusicQueue{music},
+		"queue":      &commands.MusicQueue{music},
+		"q":          &commands.MusicQueue{music},
+		"remove":     &commands.MusicRemove{music},
+		"rremove":    &commands.MusicRangeRemove{music},
+		"connect":    &commands.VoiceConnect{},
+		"c":          &commands.VoiceConnect{},
+		"go":         &commands.GOISAWESOME{},
+		"source":     &commands.Source{},
+	}
 
 	go save(bb, radio)
 	fmt.Println("봇이 실행중입니다 CTRL-C를 눌러 중지할 수 있습니다.")

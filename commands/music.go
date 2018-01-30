@@ -2,32 +2,13 @@ package commands
 
 import (
 	"errors"
-	"fmt"
-	"net/http"
-	"regexp"
-	"strconv"
-	"strings"
 	"sync"
 	"time"
-
-	"github.com/google/google-api-go-client/googleapi/transport"
-	"github.com/ksunhokim123/sdbx-discord-dj-bot/msg"
-	youtube "google.golang.org/api/youtube/v3"
-
-	"github.com/ksunhokim123/sdbx-discord-dj-bot"
 )
-
-//TODO: seperate this from commands
-type State int
 
 func e(str string) error {
 	return errors.New(str)
 }
-
-const (
-	NotPlaying State = iota
-	Playing
-)
 
 type Song struct {
 	Requester   string
@@ -37,26 +18,6 @@ type Song struct {
 	Type        string
 	Url         string
 	Thumbnail   string
-}
-
-type MusicControl int
-
-const (
-	ControlNone MusicControl = iota
-	ControlSkip
-	ControlDisconnect
-)
-
-type MusicServer struct {
-	sync.Mutex
-	State          State
-	ControlChan    chan MusicControl
-	Songs          []*Song
-	SkipVotes      map[string]bool
-	TargetSkipVote int
-	Disconnected   bool
-	Music          *Music
-	Current        *Song
 }
 
 type Music struct {
@@ -88,78 +49,4 @@ func (m *Music) InitializeServer(ID string) {
 func (m *Music) GetServer(ID string) *MusicServer {
 	m.InitializeServer(ID)
 	return m.Servers[ID]
-}
-
-func (m *MusicServer) RemoveSong(index int) {
-	m.Lock()
-	m.Songs = append(m.Songs[:index], m.Songs[index+1:]...)
-	m.Unlock()
-}
-
-func MakeYoutubeService(sess *djbot.Session) (*youtube.Service, error) {
-	client := &http.Client{
-		Transport: &transport.APIKey{Key: sess.DJBot.YoutubeToken},
-	}
-	service, err := youtube.New(client)
-	if err != nil {
-		return nil, err
-	}
-	return service, nil
-}
-
-func ParseDuration(str string) time.Duration {
-	r2 := regexp.MustCompile(`((\d{1,2})H)?((\d{1,2})M)?((\d{1,2})S)?`)
-	matched2 := r2.FindAllStringSubmatch(str, -1)
-	matched3 := matched2[len(matched2)-1]
-	if len(matched3) != 7 {
-		return 0
-	}
-	hour, _ := strconv.Atoi(matched3[2])
-	minute, _ := strconv.Atoi(matched3[4])
-	seconds, _ := strconv.Atoi(matched3[6])
-	dur := fmt.Sprintf("%dh%dm%ds", hour, minute, seconds)
-	dur2, _ := time.ParseDuration(dur)
-	return dur2
-}
-
-func GetSongs(sess *djbot.Session, ID []string) ([]*Song, error) {
-	service, err := MakeYoutubeService(sess)
-	if err != nil {
-		return nil, err
-	}
-	call := service.Videos.List("id,snippet,contentDetails")
-	call.Id(strings.Join(ID, ","))
-
-	response, err := call.Do()
-	if err != nil {
-		return nil, err
-	}
-
-	if len(response.Items) != len(ID) {
-		return nil, e(msg.NoID)
-	}
-	songs := []*Song{}
-	for i := 0; i < len(response.Items); i++ {
-		video := response.Items[i]
-		if video.Kind != "youtube#video" {
-			return nil, e(msg.NoID)
-		}
-		typ := "Non-Music"
-		if video.Snippet.CategoryId == "10" {
-			typ = "Music"
-		}
-		thumbnail := video.Snippet.Thumbnails.Default.Url
-		dur := ParseDuration(video.ContentDetails.Duration)
-		songs = append(songs, &Song{
-			Name:        video.Snippet.Title,
-			Url:         "https://www.youtube.com/watch?v=" + ID[i],
-			Type:        typ,
-			Duration:    dur,
-			Thumbnail:   thumbnail,
-			Requester:   sess.UserName,
-			RequesterID: sess.UserID,
-		})
-	}
-
-	return songs, nil
 }
