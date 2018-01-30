@@ -102,3 +102,13 @@ func (r *Radio) AddCategory(sess *djbot.Session, category string, name string) {
 		r.Songs[category] = &RadioCategory{name, []*Song{}}
 	}
 }
+
+func (r *Radio) Add(category string, song *Song) {
+	if song == nil {
+		return
+	}
+	r.Lock()
+	songs := r.Songs[category].Songs
+	r.Songs[category].Songs = append(songs, song)
+	r.Unlock()
+}

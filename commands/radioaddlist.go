@@ -39,7 +39,7 @@ func (r *RadioAddList) Handle(sess *djbot.Session, parms []interface{}) {
 	title := response2.Items[0].Snippet.Title
 	call := service.PlaylistItems.List("contentDetails")
 	call = call.PlaylistId(id)
-	call = call.MaxResults(50)
+	call = call.MaxResults(100)
 	response, err := call.Do()
 	if err != nil {
 		sess.Send(err)
@@ -57,10 +57,7 @@ func (r *RadioAddList) Handle(sess *djbot.Session, parms []interface{}) {
 	}
 	r.Radio.AddCategory(sess, category, title)
 	for _, item := range songs {
-		r.Radio.Lock()
-		songs := r.Radio.Songs[category].Songs
-		r.Radio.Songs[category].Songs = append(songs, item)
-		r.Radio.Unlock()
+		r.Radio.Add(category, item)
 	}
 	sess.Send(msg.Success)
 }

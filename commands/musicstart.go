@@ -3,6 +3,7 @@ package commands
 import (
 	"bufio"
 	"encoding/binary"
+	"fmt"
 	"math/rand"
 	"os/exec"
 
@@ -121,7 +122,6 @@ func (m *MusicServer) PlayOne(sess *djbot.Session, song *Song) {
 
 func (m *MusicServer) Start(sess *djbot.Session) {
 	if m.State == Playing {
-		sess.Send(msg.NoJustATrick)
 		return
 	}
 	if len(m.Songs) == 0 {
@@ -132,6 +132,7 @@ func (m *MusicServer) Start(sess *djbot.Session) {
 	defer func() {
 		m.Current = nil
 		m.State = NotPlaying
+		fmt.Println("nasdasd")
 	}()
 	for {
 		index := 0

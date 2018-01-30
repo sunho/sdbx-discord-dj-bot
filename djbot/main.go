@@ -90,7 +90,8 @@ func main() {
 
 	radioc.Commands["set"] = &commands.RadioCategorySet{radio}
 	radioc.Commands["get"] = &commands.RadioCategoryGet{radio}
-	radioc.Commands["add"] = &commands.RadioAddList{radio}
+	radioc.Commands["addone"] = &commands.RadioAddOne{radio}
+	radioc.Commands["addlist"] = &commands.RadioAddList{radio}
 	radioc.Commands["list"] = &commands.RadioCategoryGetGet{radio}
 	radioc.Commands["play"] = &commands.RadioPlay{radio, music}
 	bb.CommandMannager.Commands["list"] = radioc
@@ -103,12 +104,18 @@ func main() {
 
 	bb.CommandMannager.Commands["disconnect"] = &commands.VoiceDisconnect{music}
 	bb.CommandMannager.Commands["s"] = &commands.MusicSkip{music}
+	bb.CommandMannager.Commands["skip"] = &commands.MusicSkip{music}
+	bb.CommandMannager.Commands["p"] = &commands.MusicAdd{music}
 	bb.CommandMannager.Commands["play"] = &commands.MusicAdd{music}
+	bb.CommandMannager.Commands["search"] = &commands.MusicSearch{music}
 	bb.CommandMannager.Commands["find"] = &commands.MusicSearch{music}
 	bb.CommandMannager.Commands["start"] = &commands.MusicStart{music}
+	bb.CommandMannager.Commands["list"] = &commands.MusicQueue{music}
+	bb.CommandMannager.Commands["queue"] = &commands.MusicQueue{music}
 	bb.CommandMannager.Commands["q"] = &commands.MusicQueue{music}
 	bb.CommandMannager.Commands["remove"] = &commands.MusicRemove{music}
 	bb.CommandMannager.Commands["rremove"] = &commands.MusicRangeRemove{music}
+	bb.CommandMannager.Commands["connect"] = &commands.VoiceConnect{}
 	bb.CommandMannager.Commands["c"] = &commands.VoiceConnect{}
 	bb.CommandMannager.Commands["go"] = &commands.GOISAWESOME{}
 	bb.CommandMannager.Commands["source"] = &commands.Source{}
