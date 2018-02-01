@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
-	youtube "github.com/google/google-api-go-client/youtube/v3"
+	"github.com/google/google-api-go-client/googleapi/transport"
 	djbot "github.com/ksunhokim123/sdbx-discord-dj-bot"
 	"github.com/ksunhokim123/sdbx-discord-dj-bot/msg"
-	"google.golang.org/api/transport"
+	youtube "google.golang.org/api/youtube/v3"
 )
 
 func MakeYoutubeService(sess *djbot.Session) (*youtube.Service, error) {
@@ -101,16 +101,16 @@ func Search(sess *djbot.Session, keyword string) []*Song {
 	service, err := MakeYoutubeService(sess)
 	if err != nil {
 		sess.Send("youtube err", err)
-		return
+		return []*Song{}
 	}
 
 	call := service.Search.List("id,snippet").
-		Q(keywords).
+		Q(keyword).
 		MaxResults(12)
 	response, err := call.Do()
 	if err != nil {
 		sess.Send("youtube err", err)
-		return
+		return []*Song{}
 	}
 
 	slist := []string{}
@@ -124,6 +124,7 @@ func Search(sess *djbot.Session, keyword string) []*Song {
 	songs, err := GetSongs(sess, slist)
 	if err != nil {
 		sess.Send(err)
-		return
+		return []*Song{}
 	}
+	return songs
 }

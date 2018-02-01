@@ -77,7 +77,7 @@ func main() {
 	music.Radio = radio
 	radio.Load("djbot_radio.json")
 
-	radioc.Commands = []djbot.Command{
+	radioc.Commands = map[string]djbot.Command{
 		"set":     &commands.RadioCategorySet{radio},
 		"get":     &commands.RadioCategoryGet{radio},
 		"addone":  &commands.RadioAddOne{radio},
@@ -85,13 +85,13 @@ func main() {
 		"list":    &commands.RadioCategoryGetGet{radio},
 		"play":    &commands.RadioPlay{radio, music},
 	}
-	admin.Commands = []djbot.Command{
+	admin.Commands = map[string]djbot.Command{
 		"chid":   &commands.ChannelView{},
 		"envset": &commands.EnvSet{},
 		"envget": &commands.EnvGet{},
 		"fskip":  &commands.MusicFSkip{music},
 	}
-	bb.CommandMannager.Commands = []djbot.Command{
+	bb.CommandMannager.Commands = map[string]djbot.Command{
 		"list":       radioc,
 		"admin":      admin,
 		"disconnect": &commands.VoiceDisconnect{music},
@@ -102,7 +102,6 @@ func main() {
 		"search":     &commands.MusicSearch{music},
 		"find":       &commands.MusicSearch{music},
 		"start":      &commands.MusicStart{music},
-		"list":       &commands.MusicQueue{music},
 		"queue":      &commands.MusicQueue{music},
 		"q":          &commands.MusicQueue{music},
 		"remove":     &commands.MusicRemove{music},

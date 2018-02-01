@@ -3,6 +3,7 @@ package commands
 import (
 	"bufio"
 	"encoding/binary"
+	"fmt"
 	"math/rand"
 	"os/exec"
 	"sync"
@@ -40,10 +41,10 @@ type MusicServer struct {
 	Current        *Song
 }
 
-func (m *MusicServer) AddSong(sess *djbot.Session, song *Song, notifi bool) {
+func (m *MusicServer) AddSong(sess *djbot.Session, song *Song, notifi bool) error {
 	if song == nil {
 		sess.Send(msg.NoJustATrick)
-		return
+		return e(msg.NoJustATrick)
 	}
 
 	m.Lock()
@@ -59,20 +60,21 @@ func (m *MusicServer) AddSong(sess *djbot.Session, song *Song, notifi bool) {
 			m.Start(sess)
 		}
 	}
+	return nil
 }
 
 func (m *MusicServer) Remove(sess *djbot.Session, rang stypes.Range) {
-	if len(server.Songs) == 0 {
+	if len(m.Songs) == 0 {
 		sess.Send(msg.OutOfRange)
 		return
 	}
-	if 0 > rang.Start && rang.Start < len(server.Songs) && rang.End < len(server.Songs) && 0 > rang.End {
+	if 0 > rang.Start || rang.Start >= len(m.Songs) || rang.End >= len(m.Songs) || 0 > rang.End {
 		sess.Send(msg.OutOfRange)
 		return
 	}
 	for i := rang.End; i >= rang.Start; i-- {
 		if sess.IsAdmin() || sess.UserID == m.Songs[i].RequesterID {
-			m.RemoveSong(i)
+			m.RemoveSong(sess, i)
 		}
 	}
 }
@@ -83,7 +85,7 @@ func (m *MusicServer) RemoveSong(sess *djbot.Session, index int) {
 		return
 	}
 
-	if 0 > index && index < len(m.Songs) {
+	if 0 > index || index >= len(m.Songs) {
 		sess.Send(msg.OutOfRange)
 		return
 	}
@@ -132,28 +134,29 @@ func (m *MusicServer) SkipVote(sess *djbot.Session) (willskip bool) {
 	return false
 }
 
-func (m *MusicServer) PlayOne(sess *djbot.Session, song *Song) {
+func (m *MusicServer) PlayOne(sess *djbot.Session, song *Song) bool {
 	url := song.Url
+	fmt.Println(url)
 	ytdl := exec.Command("youtube-dl", "-v", "-f", "bestaudio", "-o", "-", url)
 	ytdlout, err := ytdl.StdoutPipe()
 	if err != nil {
-		sess.Send(err)
-		return
+		fmt.Println(err)
+		return false
 	}
 	ffmpeg := exec.Command("ffmpeg", "-i", "pipe:0", "-f", "s16le", "-ar", "48000", "-ac", "2", "pipe:1")
 	ffmpegout, err := ffmpeg.StdoutPipe()
 	ffmpeg.Stdin = ytdlout
 	if err != nil {
-		sess.Send(err)
-		return
+		fmt.Println(err)
+		return false
 	}
 	ffmpegbuf := bufio.NewReaderSize(ffmpegout, 16384)
 	dca := exec.Command("dca")
 	dca.Stdin = ffmpegbuf
 	dcaout, err := dca.StdoutPipe()
 	if err != nil {
-		sess.Send(err)
-		return
+		fmt.Println(err)
+		return false
 	}
 	defer func() {
 		go dca.Wait()
@@ -161,8 +164,8 @@ func (m *MusicServer) PlayOne(sess *djbot.Session, song *Song) {
 	dcabuf := bufio.NewReaderSize(dcaout, 16384)
 	err = ytdl.Start()
 	if err != nil {
-		sess.Send(err)
-		return
+		fmt.Println(err)
+		return true
 	}
 	defer func() {
 		go ytdl.Wait()
@@ -173,50 +176,47 @@ func (m *MusicServer) PlayOne(sess *djbot.Session, song *Song) {
 		go ffmpeg.Wait()
 	}()
 	if err != nil {
-		sess.Send(err)
-		return
+		fmt.Println(err)
+		return true
 	}
 
 	err = dca.Start()
 	if err != nil {
-		sess.Send(err)
-		return
+		fmt.Println(err)
+		return true
 	}
 	defer func() {
 		go dca.Wait()
 	}()
 	if err != nil {
-		sess.Send(err)
-		return
+		fmt.Println(err)
+		return true
 	}
 	if dcabuf == nil {
-		return
+		return true
 	}
 	var opuslen int16
-	done := true
 	sess.VoiceConnection.Speaking(true)
 	defer sess.VoiceConnection.Speaking(false)
-	for done {
+	for {
 		select {
 		case control := <-m.ControlChan:
 			switch control {
 			case ControlSkip:
-				done = false
+				return true
 			case ControlDisconnect:
-				done = false
 				sess.Disconnect()
+				return false
 			}
 		default:
 			err = binary.Read(dcabuf, binary.LittleEndian, &opuslen)
 			if err != nil {
-				done = false
-				break
+				return true
 			}
 			opus := make([]byte, opuslen)
 			err = binary.Read(dcabuf, binary.LittleEndian, &opus)
 			if err != nil {
-				done = false
-				break
+				return true
 			}
 			sess.VoiceConnection.OpusSend <- opus
 		}
@@ -233,6 +233,8 @@ func (m *MusicServer) Start(sess *djbot.Session) {
 	}
 	m.State = Playing
 	defer func() {
+		m.ControlChan = make(chan MusicControl)
+		m.Songs = []*Song{}
 		m.Current = nil
 		m.State = NotPlaying
 	}()
@@ -263,13 +265,18 @@ func (m *MusicServer) Start(sess *djbot.Session) {
 		}
 		song := m.Songs[index]
 		m.Current = song
-		m.RemoveSong(index)
-		m.PlayOne(sess, song)
+		m.RemoveSong(sess, index)
+		if !m.PlayOne(sess, song) {
+			break
+		}
 	}
 }
 
 func (m *MusicServer) Search(sess *djbot.Session, keywords string) {
-
+	songs := Search(sess, keywords)
+	if len(songs) == 0 {
+		return
+	}
 	list := []string{}
 	dlist := []interface{}{}
 	for i := 0; i < len(songs); i++ {

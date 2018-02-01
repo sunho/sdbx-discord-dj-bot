@@ -6,23 +6,26 @@ import (
 	"github.com/ksunhokim123/sdbx-discord-dj-bot/stypes"
 )
 
-type MusicAdd struct {
+type MusicAny struct {
 	Music *Music
 }
 
-func (mc *MusicAdd) Handle(sess *djbot.Session, parms []interface{}) {
+func (mc *MusicAny) Handle(sess *djbot.Session, parms []interface{}) {
+	url := parms[0].(string)
 	server := mc.Music.GetServer(sess.ServerID)
-	song := GetSongFromURL(sess, parms[0].(string))
-	if song == nil {
-		return
+	song := &Song{
+		Name:        url,
+		Url:         url,
+		Requester:   sess.UserName,
+		RequesterID: sess.UserID,
 	}
 	server.AddSong(sess, song, true)
 }
 
-func (mc *MusicAdd) Description() string {
+func (mc *MusicAny) Description() string {
 	return msg.DescriptionMusicAdd
 }
 
-func (mc *MusicAdd) Types() []stypes.Type {
+func (mc *MusicAny) Types() []stypes.Type {
 	return []stypes.Type{stypes.TypeString}
 }

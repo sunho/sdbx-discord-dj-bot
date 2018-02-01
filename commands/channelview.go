@@ -37,9 +37,14 @@ func (cv *ChannelView) Handle(sess *djbot.Session, parms []interface{}) {
 	})
 }
 
+func (cv *ChannelView) Select(sess *djbot.Session, id interface{}) {
+	sess.SendStr(id.(string))
+}
+
 func (cv *ChannelView) Description() string {
 	return msg.DescriptionChannelView
 }
+
 func (cv *ChannelView) Types() []stypes.Type {
 	return []stypes.Type{}
 }
