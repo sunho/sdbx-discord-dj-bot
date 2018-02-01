@@ -17,6 +17,8 @@ func (mc *MusicAny) Handle(sess *djbot.Session, parms []interface{}) {
 		Name:        url,
 		Url:         url,
 		Requester:   sess.UserName,
+		Duration:    10,
+		Thumbnail:   "https://images-ext-2.discordapp.net/external/GWh82wCCTl0aFeIGvs1BK0I7lDu3GQXhD2fzleJh_kQ/https/i.ytimg.com/vi/2Vv-BfVoq4g/default.jpg?width=80&height=60",
 		RequesterID: sess.UserID,
 	}
 	server.AddSong(sess, song, true)

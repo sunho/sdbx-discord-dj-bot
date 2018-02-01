@@ -110,6 +110,7 @@ func main() {
 		"c":          &commands.VoiceConnect{},
 		"go":         &commands.GOISAWESOME{},
 		"source":     &commands.Source{},
+		"any":        &command.MusicAny{music},
 	}
 
 	go save(bb, radio)

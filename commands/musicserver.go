@@ -31,6 +31,7 @@ const (
 
 type MusicServer struct {
 	sync.Mutex
+	NP             int
 	State          State
 	ControlChan    chan MusicControl
 	Songs          []*Song
