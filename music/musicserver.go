@@ -6,41 +6,12 @@ import (
 	"fmt"
 	"math/rand"
 	"os/exec"
-	"sync"
 
 	djbot "github.com/sunho/sdbx-discord-dj-bot"
 	"github.com/sunho/sdbx-discord-dj-bot/envs"
 	"github.com/sunho/sdbx-discord-dj-bot/msg"
 	"github.com/sunho/sdbx-discord-dj-bot/stypes"
 )
-
-type State int
-
-const (
-	NotPlaying State = iota
-	Playing
-)
-
-type MusicControl int
-
-const (
-	ControlNone MusicControl = iota
-	ControlSkip
-	ControlDisconnect
-)
-
-type MusicServer struct {
-	sync.Mutex
-	NP             int
-	State          State
-	ControlChan    chan MusicControl
-	Songs          []*Song
-	SkipVotes      map[string]bool
-	TargetSkipVote int
-	Disconnected   bool
-	Music          *Music
-	Current        *Song
-}
 
 func (m *MusicServer) AddSong(sess *djbot.Session, song *Song, notifi bool) error {
 	if song == nil {
