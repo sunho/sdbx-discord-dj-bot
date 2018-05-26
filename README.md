@@ -4,7 +4,7 @@
 # 설치
 적절한 버전의 고 환경이 갖추어져 있다면, 아래의 명령어로 DJ봇을 설치 가능합니다.
 ```
-go get github.com/ksunhokim123/sdbx-discord-dj-bot/djbot
+go get github.com/sunho/sdbx-discord-dj-bot/djbot
 ```
 설치를 마친 후에는 다음 명령어를 실행하여 `tokens.txt`을 생성하십시오.
 ```

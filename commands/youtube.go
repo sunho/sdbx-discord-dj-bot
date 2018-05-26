@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/google/google-api-go-client/googleapi/transport"
-	djbot "github.com/ksunhokim123/sdbx-discord-dj-bot"
-	"github.com/ksunhokim123/sdbx-discord-dj-bot/msg"
+	djbot "github.com/sunho/sdbx-discord-dj-bot"
+	"github.com/sunho/sdbx-discord-dj-bot/msg"
 	youtube "google.golang.org/api/youtube/v3"
 )
 

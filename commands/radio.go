@@ -6,7 +6,7 @@ import (
 	"math/rand"
 	"sync"
 
-	djbot "github.com/ksunhokim123/sdbx-discord-dj-bot"
+	djbot "github.com/sunho/sdbx-discord-dj-bot"
 )
 
 type RadioCategory struct {

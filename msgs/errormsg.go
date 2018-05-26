@@ -1,4 +1,4 @@
-package msg
+package msgs
 
 //TODO sperate the messages for users and ditto for console.
 /*const (

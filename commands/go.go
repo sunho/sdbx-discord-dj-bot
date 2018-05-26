@@ -8,14 +8,14 @@ import (
 	"path/filepath"
 
 	"github.com/bwmarrin/discordgo"
-	djbot "github.com/ksunhokim123/sdbx-discord-dj-bot"
-	"github.com/ksunhokim123/sdbx-discord-dj-bot/stypes"
+	djbot "github.com/sunho/sdbx-discord-dj-bot"
+	"github.com/sunho/sdbx-discord-dj-bot/stypes"
 )
 
 type GOISAWESOME struct {
 }
 
-var ss = []string{
+const ss = [...]string{
 	"Write in Go!",
 	"고가 모든걸 해결합니다",
 	"'GO made me FREE'",

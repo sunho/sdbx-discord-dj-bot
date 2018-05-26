@@ -3,9 +3,9 @@ package commands
 import (
 	"fmt"
 
-	djbot "github.com/ksunhokim123/sdbx-discord-dj-bot"
-	"github.com/ksunhokim123/sdbx-discord-dj-bot/msg"
-	"github.com/ksunhokim123/sdbx-discord-dj-bot/stypes"
+	djbot "github.com/sunho/sdbx-discord-dj-bot"
+	"github.com/sunho/sdbx-discord-dj-bot/msg"
+	"github.com/sunho/sdbx-discord-dj-bot/stypes"
 )
 
 type EnvGet struct {

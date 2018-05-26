@@ -10,11 +10,11 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/ksunhokim123/sdbx-discord-dj-bot/envs"
+	"github.com/sunho/sdbx-discord-dj-bot/envs"
 
-	"github.com/ksunhokim123/sdbx-discord-dj-bot/commands"
+	"github.com/sunho/sdbx-discord-dj-bot/commands"
 
-	djbot "github.com/ksunhokim123/sdbx-discord-dj-bot"
+	djbot "github.com/sunho/sdbx-discord-dj-bot"
 )
 
 var initial = flag.Bool("initial", false, "Make a tokens.json")
