@@ -3,11 +3,13 @@ package commands
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/sunho/sdbx-discord-dj-bot/djbot"
 	"github.com/sunho/sdbx-discord-dj-bot/msgs"
 	"github.com/sunho/sdbx-discord-dj-bot/music"
+	"github.com/sunho/sdbx-discord-dj-bot/music/provider"
 )
 
 type MusicCommander struct {
@@ -48,17 +50,51 @@ func (m *MusicCommander) PlayAction(dj *djbot.DJBot, msg *discordgo.MessageCreat
 }
 
 func (m *MusicCommander) NPAction(dj *djbot.DJBot, msg *discordgo.MessageCreate) *discordgo.MessageSend {
-	song, rem := m.m.NP()
+	song := m.m.Mp.GetCurrent()
 	if song == nil {
 		return &discordgo.MessageSend{Content: msgs.Fail}
 	}
 
-	song.Length = rem
+	rem := m.m.Mp.GetRemaningTime()
 
-	return msgs.SongNPMsg(song.Song, song.Requestor)
+	return msgs.SongNPMsg(song.Song, rem, song.Requestor)
 }
 
-func (m *MusicCommander) QueueAction(sess *discordgo.Session, msg *discordgo.MessageCreate) *discordgo.MessageSend {
+func (m *MusicCommander) QueueAction(dj *djbot.DJBot, msg *discordgo.MessageCreate) *discordgo.MessageSend {
+	songs := m.m.Mp.GetSongs()
+
+	if len(songs) == 0 {
+		return &discordgo.MessageSend{Content: msgs.Fail}
+	}
+
+	members := []*discordgo.Member{}
+	songs2 := []provider.Song{}
+
+	for _, song := range songs {
+		songs2 = append(songs2, song.Song)
+		members = append(members, song.Requestor)
+	}
+
+	return msgs.SongQueueMsg(songs2, members)
+}
+
+func (m *MusicCommander) FindAction(dj *djbot.DJBot, msg *discordgo.MessageCreate) *discordgo.MessageSend {
+	content := msg.Content
+	mem, _ := dj.Discord.GuildMember(dj.GuildID, msg.Author.ID)
+
+	if trimContent := strings.TrimPrefix(content, "-d "); trimContent != content {
+		err := m.m.AddFirstSong(mem, "youtube", trimContent)
+		if err != nil {
+			return &discordgo.MessageSend{Content: msgs.Fail}
+		}
+		return nil
+	}
+
+	err := m.m.SearchSong(mem, "youtube", content)
+	if err != nil {
+		return &discordgo.MessageSend{Content: msgs.Fail}
+	}
+
 	return nil
 }
 

@@ -27,8 +27,9 @@ func Register(dj *djbot.DJBot) error {
 			Action: mc.PlayAction,
 		},
 		djbot.Command{
-			Name:  "find",
-			Usage: "[문 자 열 들] 유튜브에서 음악을 검색합니다",
+			Name:   "find",
+			Usage:  "[문 자 열 들] 유튜브에서 음악을 검색합니다 find -d [문자열]로 검색결과중 가장 위에 있는 음악을 바로 큐에 넣을 수 있습니다",
+			Action: mc.FindAction,
 		},
 		djbot.Command{
 			Name:  "skip",
@@ -43,20 +44,17 @@ func Register(dj *djbot.DJBot) error {
 			Usage: "[index] 음악을 큐에서 지웁니다. 그 곡의 선곡자만 가능합니다",
 		},
 		djbot.Command{
-			Name:  "rremove",
-			Usage: "[index1]~[index2] 사이의 음악 중 사용자가 선곡한 곡을 큐에서 지웁니다",
-		},
-		djbot.Command{
-			Name:  "list",
-			Usage: "[url] 유튜브 재생목록의 모든 음악을 음악 큐에 넣습니다",
-		},
-		djbot.Command{
 			Name: "help",
 		},
 		djbot.Command{
 			Name:   "np",
 			Usage:  "현재 재생되고 있는 음악의 정보를 뿜습니다",
 			Action: mc.NPAction,
+		},
+		djbot.Command{
+			Name:   "queue",
+			Usage:  "현재 음악큐를 뿜습니다",
+			Action: mc.QueueAction,
 		},
 		djbot.Command{
 			Name:  "disconnect",
@@ -66,3 +64,12 @@ func Register(dj *djbot.DJBot) error {
 
 	return nil
 }
+
+// djbot.Command{
+// 	Name:  "rremove",
+// 	Usage: "[index1]~[index2] 사이의 음악 중 사용자가 선곡한 곡을 큐에서 지웁니다",
+// },
+// djbot.Command{
+// 	Name:  "list",
+// 	Usage: "[url] 유튜브 재생목록의 모든 음악을 음악 큐에 넣습니다",
+// },

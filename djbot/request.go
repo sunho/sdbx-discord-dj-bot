@@ -10,6 +10,7 @@ import (
 
 type Request struct {
 	UserID   string
+	Title    string
 	List     []string
 	DataList []interface{}
 	CallBack func(interface{})
@@ -51,7 +52,7 @@ func (rm *RequestHandler) run() {
 		select {
 		case r := <-rm.C:
 			rm.requests[r.UserID] = r
-			rm.dj.MsgC <- msgs.RequestListMsg(r.List)
+			rm.dj.MsgC <- msgs.RequestListMsg(r.Title, r.List)
 
 			// timeout
 			go func() {

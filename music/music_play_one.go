@@ -16,7 +16,6 @@ type Song struct {
 }
 
 func playOne(conn *discordgo.VoiceConnection, bufferSize int, skipC chan struct{}, url string) {
-	log.Println("asf")
 	ytdl := exec.Command("youtube-dl", "-v", "-f", "bestaudio", "-o", "-", url)
 	ytdlout, err := ytdl.StdoutPipe()
 	if err != nil {
@@ -44,6 +43,8 @@ func playOne(conn *discordgo.VoiceConnection, bufferSize int, skipC chan struct{
 		go dca.Wait()
 	}()
 	dcabuf := bufio.NewReaderSize(dcaout, bufferSize)
+
+	log.Println(bufferSize)
 
 	err = ytdl.Start()
 	if err != nil {

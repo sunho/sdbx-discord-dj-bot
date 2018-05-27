@@ -152,3 +152,53 @@ created by github.com/bwmarrin/discordgo.(*Session).handle
 2018/05/28 00:51:06 asf
 2018/05/28 00:51:52 asf
 2018/05/28 00:53:21 asf
+2018/05/28 01:08:14 asf
+2018/05/28 01:23:24 [DG0] voice.go:356:wsListen() voice endpoint singapore239.discord.gg:80 websocket closed unexpectantly, websocket: close 4014: Disconnected.
+2018/05/28 01:23:24 [DG0] voice.go:197:Close() error closing websocket, websocket: close sent
+2018/05/28 01:23:44 asf
+2018/05/28 01:28:47 EOF
+2018/05/28 01:30:38 asf
+2018/05/28 01:35:41 EOF
+2018/05/28 01:46:45 asf
+2018/05/28 01:48:59 [DG0] voice.go:356:wsListen() voice endpoint singapore142.discord.gg:80 websocket closed unexpectantly, websocket: close 4014: Disconnected.
+2018/05/28 01:48:59 [DG0] voice.go:197:Close() error closing websocket, websocket: close sent
+2018/05/28 01:49:15 asf
+2018/05/28 01:50:39 [DG0] voice.go:356:wsListen() voice endpoint singapore183.discord.gg:80 websocket closed unexpectantly, websocket: close 4014: Disconnected.
+2018/05/28 01:50:39 [DG0] voice.go:197:Close() error closing websocket, websocket: close sent
+2018/05/28 01:50:47 asf
+2018/05/28 01:50:47 Already connected
+2018/05/28 01:50:47 Already connected
+2018/05/28 01:50:47 Already connected
+2018/05/28 01:51:08 [DG0] voice.go:356:wsListen() voice endpoint singapore142.discord.gg:80 websocket closed unexpectantly, websocket: close 4014: Disconnected.
+2018/05/28 01:51:08 [DG0] voice.go:197:Close() error closing websocket, websocket: close sent
+2018/05/28 02:09:36 recoverd: runtime error: invalid memory address or nil pointer dereference
+2018/05/28 02:09:36 goroutine 38 [running]:
+runtime/debug.Stack(0xc420487ca8, 0x2, 0x2)
+	/usr/lib/go-1.10/src/runtime/debug/stack.go:24 +0xa7
+github.com/sunho/sdbx-discord-dj-bot/djbot.(*DJBot).HandleNewMessage.func1()
+	/home/sunho/go/src/github.com/sunho/sdbx-discord-dj-bot/djbot/handlers.go:18 +0x9f
+panic(0x71d220, 0x94ea80)
+	/usr/lib/go-1.10/src/runtime/panic.go:502 +0x229
+github.com/sunho/sdbx-discord-dj-bot/djbot.(*CommandHandler).HandleMessage(0xc42010c540, 0xc4200ad200, 0xc4201a00a8)
+	/home/sunho/go/src/github.com/sunho/sdbx-discord-dj-bot/djbot/command.go:59 +0x24f
+github.com/sunho/sdbx-discord-dj-bot/djbot.(*DJBot).HandleNewMessage(0xc4200a8fa0, 0xc4200ad200, 0xc4201a00a8)
+	/home/sunho/go/src/github.com/sunho/sdbx-discord-dj-bot/djbot/handlers.go:38 +0x15b
+github.com/sunho/sdbx-discord-dj-bot/djbot.(*DJBot).HandleNewMessage-fm(0xc4200ad200, 0xc4201a00a8)
+	/home/sunho/go/src/github.com/sunho/sdbx-discord-dj-bot/djbot/djbot.go:30 +0x3e
+github.com/bwmarrin/discordgo.messageCreateEventHandler.Handle(0xc42001ef40, 0xc4200ad200, 0x71e4a0, 0xc4201a00a8)
+	/home/sunho/go/src/github.com/bwmarrin/discordgo/eventhandlers.go:496 +0x57
+created by github.com/bwmarrin/discordgo.(*Session).handle
+	/home/sunho/go/src/github.com/bwmarrin/discordgo/event.go:162 +0x111
+
+2018/05/28 02:13:35 asf
+2018/05/28 02:19:07 EOF
+2018/05/28 02:20:47 [DG0] voice.go:356:wsListen() voice endpoint singapore484.discord.gg:80 websocket closed unexpectantly, websocket: close 4014: Disconnected.
+2018/05/28 02:20:47 [DG0] voice.go:197:Close() error closing websocket, websocket: close sent
+2018/05/28 02:24:11 0
+2018/05/28 02:28:40 0
+2018/05/28 02:29:14 0
+2018/05/28 02:30:00 1024
+2018/05/28 02:30:34 100000
+2018/05/28 02:35:09 10000000
+2018/05/28 02:39:07 EOF
+2018/05/28 02:44:00 10000000

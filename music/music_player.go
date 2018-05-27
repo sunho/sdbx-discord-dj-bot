@@ -38,9 +38,10 @@ type MusicPlayer struct {
 
 func NewMusicPlayer() *MusicPlayer {
 	return &MusicPlayer{
-		Emitter: &emitter.Emitter{},
-		songs:   []*Song{},
-		skipC:   make(chan struct{}),
+		Emitter:    &emitter.Emitter{},
+		songs:      []*Song{},
+		bufferSize: 10000000,
+		skipC:      make(chan struct{}),
 	}
 }
 

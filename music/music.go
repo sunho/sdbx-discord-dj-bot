@@ -2,7 +2,7 @@ package music
 
 import (
 	"fmt"
-	"time"
+	"log"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/sunho/sdbx-discord-dj-bot/djbot"
@@ -13,14 +13,14 @@ import (
 
 type Music struct {
 	providers map[string]provider.Provider
-	mp        *MusicPlayer
+	Mp        *MusicPlayer
 	dj        *djbot.DJBot
 }
 
 func New(dj *djbot.DJBot) (*Music, error) {
 	m := &Music{
+		Mp:        NewMusicPlayer(),
 		providers: make(map[string]provider.Provider),
-		mp:        NewMusicPlayer(),
 		dj:        dj,
 	}
 
@@ -43,20 +43,20 @@ func (m *Music) initProviders() error {
 }
 
 func (m *Music) PrepareIfNotReady() error {
-	if m.mp.GetConnection() == nil {
+	if m.Mp.GetConnection() == nil {
 		vc, err := m.dj.Discord.ChannelVoiceJoin(m.dj.GuildID, m.dj.VoiceChannelID, false, true)
 		if err != nil {
 			return err
 		}
 
-		err = m.mp.Connect(vc)
+		err = m.Mp.Connect(vc)
 		if err != nil {
 			return err
 		}
 	}
 
-	if m.mp.GetState() == NotPlaying {
-		err := m.mp.Play()
+	if m.Mp.GetState() == NotPlaying {
+		err := m.Mp.Play()
 		if err != nil {
 			return err
 		}
@@ -64,20 +64,69 @@ func (m *Music) PrepareIfNotReady() error {
 
 	return nil
 }
+func (m *Music) AddFirstSong(requestor *discordgo.Member, providerName string, keyword string) error {
+	p, ok := m.providers[providerName]
+	if !ok {
+		return fmt.Errorf("No such provider")
+	}
 
-type QueueItem struct {
-	Index     int
-	Name      string
-	Requestor string
+	songs, err := p.Search(keyword, 15)
+	if err != nil {
+		return err
+	}
+
+	if len(songs) == 0 {
+		return fmt.Errorf("Emptry search result")
+	}
+
+	m.Mp.AddSong(&Song{
+		Song:      songs[0],
+		Requestor: requestor,
+	})
+
+	return m.PrepareIfNotReady()
+}
+func (m *Music) SearchSong(requestor *discordgo.Member, providerName string, keyword string) error {
+	p, ok := m.providers[providerName]
+	if !ok {
+		return fmt.Errorf("No such provider")
+	}
+
+	songs, err := p.Search(keyword, 15)
+	if err != nil {
+		return err
+	}
+
+	dataList := []interface{}{}
+	strList := []string{}
+
+	for _, song := range songs {
+		strList = append(strList, song.Name)
+		dataList = append(dataList, &Song{
+			Song:      song,
+			Requestor: requestor,
+		})
+	}
+
+	m.dj.RequestHandler.C <- &djbot.Request{
+		Title:    fmt.Sprintf(msgs.SongSearch, keyword),
+		UserID:   requestor.User.ID,
+		List:     strList,
+		DataList: dataList,
+		CallBack: m.findRequestCallback,
+	}
+
+	return nil
 }
 
-func (m *Music) Queue() []QueueItem {
-	m.mp.GetCurrent()
-	return []QueueItem{}
-}
+func (m *Music) findRequestCallback(obj interface{}) {
+	song := obj.(*Song)
+	m.Mp.AddSong(song)
 
-func (m *Music) NP() (*Song, time.Duration) {
-	return m.mp.GetCurrent(), m.mp.GetRemaningTime()
+	err := m.PrepareIfNotReady()
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func (m *Music) AddSongByURL(requestor *discordgo.Member, providerName string, url string) error {
@@ -96,12 +145,12 @@ func (m *Music) AddSongByURL(requestor *discordgo.Member, providerName string, u
 		Requestor: requestor,
 	}
 
-	m.mp.AddSong(song2)
+	m.Mp.AddSong(song2)
 	return nil
 }
 
 func (m *Music) Run() {
-	e := m.mp.Emitter
+	e := m.Mp.Emitter
 	playing := e.On(TopicPlaying)
 	added := e.On(TopicAdded)
 	removed := e.On(TopicRemoved)
