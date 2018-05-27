@@ -11,16 +11,16 @@ type Command struct {
 	Name    string
 	Aliases []string
 	Usage   string
-	Action  func(sess *discordgo.Session, msg *discordgo.MessageCreate) *discordgo.MessageSend
+	Action  func(dj *DJBot, msg *discordgo.MessageCreate) *discordgo.MessageSend
 }
 
-func (c *Command) isPerfomable(content string) bool {
-	if strings.HasPrefix(content, c.Name+" ") || content == c.Name {
+func (c *Command) isPreformable(prefix string) bool {
+	if prefix == c.Name {
 		return true
 	}
 
 	for _, alias := range c.Aliases {
-		if strings.HasPrefix(content, alias+" ") || content == alias {
+		if prefix == alias {
 			return true
 		}
 	}
@@ -42,7 +42,6 @@ func NewCommandHandler(dj *DJBot) *CommandHandler {
 
 func (ch *CommandHandler) HandleMessage(sess *discordgo.Session, msg *discordgo.MessageCreate) {
 	content := msg.Content
-
 	delimitter := ch.dj.Delimitter
 	if !strings.HasPrefix(content, delimitter) {
 		return
@@ -51,9 +50,13 @@ func (ch *CommandHandler) HandleMessage(sess *discordgo.Session, msg *discordgo.
 	end := len(delimitter)
 	content = content[end:]
 
+	arr := strings.Split(content, " ")
+	prefix := arr[0]
+	msg.Content = strings.Join(arr[1:], " ")
+
 	for _, cmd := range ch.Commands {
-		if cmd.isPerfomable(content) {
-			msg2 := cmd.Action(sess, msg)
+		if cmd.isPreformable(prefix) {
+			msg2 := cmd.Action(ch.dj, msg)
 			if msg != nil {
 				ch.dj.MsgC <- msg2
 			}

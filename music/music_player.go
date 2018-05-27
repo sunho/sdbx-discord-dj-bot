@@ -3,6 +3,7 @@ package music
 import (
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/olebedev/emitter"
@@ -16,19 +17,21 @@ const (
 )
 
 const (
-	TopicQueueAdded   = "add"
-	TopicQueueRemoved = "remove"
-	TopicSkipped      = "skip"
-	TopicPlaying      = "play"
+	TopicAdded   = "add"
+	TopicRemoved = "remove"
+	TopicSkipped = "skip"
+	TopicPlaying = "play"
 )
 
 type MusicPlayer struct {
-	Emitter    *emitter.Emitter
-	mu         sync.RWMutex
-	state      State
-	songs      []*Song
-	current    *Song
-	connection *discordgo.VoiceConnection
+	Emitter     *emitter.Emitter
+	mu          sync.RWMutex
+	state       State
+	songs       []*Song
+	current     *Song
+	connection  *discordgo.VoiceConnection
+	bufferSize  int
+	songEndTime time.Time
 
 	skipC chan struct{}
 }
@@ -37,6 +40,7 @@ func NewMusicPlayer() *MusicPlayer {
 	return &MusicPlayer{
 		Emitter: &emitter.Emitter{},
 		songs:   []*Song{},
+		skipC:   make(chan struct{}),
 	}
 }
 
@@ -51,14 +55,8 @@ func (mp *MusicPlayer) AddSong(song *Song) {
 	mp.mu.Lock()
 	defer mp.mu.Unlock()
 
-	if mp.current == nil {
-		mp.current = song
-		return
-	}
-
 	mp.songs = append(mp.songs, song)
-
-	<-mp.Emitter.Emit(TopicQueueAdded, song)
+	<-mp.Emitter.Emit(TopicAdded, song)
 }
 
 func (mp *MusicPlayer) RemoveSong(song *Song) error {
@@ -68,12 +66,26 @@ func (mp *MusicPlayer) RemoveSong(song *Song) error {
 	for i, song2 := range mp.songs {
 		if song == song2 {
 			mp.songs = append(mp.songs[:i], mp.songs[i+1:]...)
-			<-mp.Emitter.Emit(TopicQueueRemoved, song)
+			<-mp.Emitter.Emit(TopicRemoved, song)
 			return nil
 		}
 	}
 
 	return fmt.Errorf("No such song")
+}
+
+func (mp *MusicPlayer) GetBufferSize() int {
+	mp.mu.RLock()
+	defer mp.mu.RUnlock()
+
+	return mp.bufferSize
+}
+
+func (mp *MusicPlayer) SetBufferSize(bufferSize int) {
+	mp.mu.Lock()
+	defer mp.mu.Unlock()
+
+	mp.bufferSize = bufferSize
 }
 
 func (mp *MusicPlayer) GetState() State {
@@ -86,6 +98,8 @@ func (mp *MusicPlayer) GetState() State {
 func (mp *MusicPlayer) SetState(state State) {
 	mp.mu.Lock()
 	defer mp.mu.Unlock()
+
+	mp.state = state
 }
 
 func (mp *MusicPlayer) GetCurrent() *Song {
@@ -102,6 +116,17 @@ func (mp *MusicPlayer) GetConnection() *discordgo.VoiceConnection {
 	return mp.connection
 }
 
+func (mp *MusicPlayer) GetRemaningTime() time.Duration {
+	mp.mu.RLock()
+	defer mp.mu.RUnlock()
+
+	if mp.current == nil {
+		return 0
+	}
+
+	return mp.songEndTime.Sub(time.Now())
+}
+
 func (mp *MusicPlayer) Skip() error {
 	mp.mu.Lock()
 	defer mp.mu.Unlock()
@@ -115,9 +140,9 @@ func (mp *MusicPlayer) Skip() error {
 	return nil
 }
 
-func (mp *MusicPlayer) Play(connection *discordgo.VoiceConnection) error {
+func (mp *MusicPlayer) Play() error {
 	mp.mu.Lock()
-	defer mp.mu.Lock()
+	defer mp.mu.Unlock()
 
 	if mp.state == Playing {
 		return fmt.Errorf("Already playing")
@@ -136,14 +161,17 @@ func (mp *MusicPlayer) play() {
 			mp.mu.Unlock()
 			break
 		}
-
 		mp.current = mp.songs[0]
 		mp.songs = mp.songs[1:]
-		url := mp.current.URL
+		current := mp.current
+		bufferSize := mp.bufferSize
+		mp.songEndTime = time.Now().Add(current.Length + time.Second)
 		mp.mu.Unlock()
-		<-mp.Emitter.Emit(TopicPlaying, mp.current)
-		playOne(mp.connection, mp.skipC, url)
+		<-mp.Emitter.Emit(TopicPlaying, current)
+
+		playOne(mp.connection, bufferSize, mp.skipC, current.URL)
 	}
+
 	mp.SetState(NotPlaying)
 	mp.Disconnect()
 }

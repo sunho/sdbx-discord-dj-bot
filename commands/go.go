@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/sunho/sdbx-discord-dj-bot/djbot"
 )
 
 var goMsgs = [...]string{
@@ -26,7 +27,7 @@ var goMsgs = [...]string{
 	"구글에서 만들었으니 당연히 갓언어겠죠?",
 }
 
-func goAction(sess *discordgo.Session, msg *discordgo.MessageCreate) *discordgo.MessageSend {
+func goAction(dj *djbot.DJBot, msg *discordgo.MessageCreate) *discordgo.MessageSend {
 	filenames := make([]string, 0)
 
 	filepath.Walk("gophers", func(path string, f os.FileInfo, err error) error {

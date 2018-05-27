@@ -15,7 +15,7 @@ func (dj *DJBot) HandleNewMessage(sess *discordgo.Session, msg *discordgo.Messag
 	defer func() {
 		if r := recover(); r != nil {
 			log.Println("recoverd:", r)
-			log.Println(debug.Stack())
+			log.Println(string(debug.Stack()))
 		}
 	}()
 
@@ -34,6 +34,6 @@ func (dj *DJBot) HandleNewMessage(sess *discordgo.Session, msg *discordgo.Messag
 	}
 
 handle:
-	dj.RequestManager.HandleMessage(msg)
+	dj.RequestHandler.HandleMessage(msg)
 	dj.CommandHandler.HandleMessage(sess, msg)
 }

@@ -39,7 +39,7 @@ func main() {
 		panic(err)
 	}
 
-	commands.Register(dj.CommandHandler)
+	commands.Register(dj)
 
 	err = dj.Open()
 	if err != nil {

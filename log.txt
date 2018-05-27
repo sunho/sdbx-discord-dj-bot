@@ -1,2 +1,154 @@
 2018/05/27 20:33:45 open gophers: no such file or directory
 2018/05/27 20:33:47 open gophers: no such file or directory
+2018/05/27 20:56:23 recoverd: runtime error: invalid memory address or nil pointer dereference
+2018/05/27 20:56:23 [103 111 114 111 117 116 105 110 101 32 54 57 32 91 114 117 110 110 105 110 103 93 58 10 114 117 110 116 105 109 101 47 100 101 98 117 103 46 83 116 97 99 107 40 48 120 99 52 50 48 52 56 52 52 99 48 44 32 48 120 50 44 32 48 120 50 41 10 9 47 117 115 114 47 108 105 98 47 103 111 45 49 46 49 48 47 115 114 99 47 114 117 110 116 105 109 101 47 100 101 98 117 103 47 115 116 97 99 107 46 103 111 58 50 52 32 43 48 120 97 55 10 103 105 116 104 117 98 46 99 111 109 47 115 117 110 104 111 47 115 100 98 120 45 100 105 115 99 111 114 100 45 100 106 45 98 111 116 47 100 106 98 111 116 46 40 42 68 74 66 111 116 41 46 72 97 110 100 108 101 78 101 119 77 101 115 115 97 103 101 46 102 117 110 99 49 40 41 10 9 47 104 111 109 101 47 115 117 110 104 111 47 103 111 47 115 114 99 47 103 105 116 104 117 98 46 99 111 109 47 115 117 110 104 111 47 115 100 98 120 45 100 105 115 99 111 114 100 45 100 106 45 98 111 116 47 100 106 98 111 116 47 104 97 110 100 108 101 114 115 46 103 111 58 49 56 32 43 48 120 57 99 10 112 97 110 105 99 40 48 120 54 102 48 54 48 48 44 32 48 120 57 48 48 97 48 48 41 10 9 47 117 115 114 47 108 105 98 47 103 111 45 49 46 49 48 47 115 114 99 47 114 117 110 116 105 109 101 47 112 97 110 105 99 46 103 111 58 53 48 50 32 43 48 120 50 50 57 10 103 105 116 104 117 98 46 99 111 109 47 115 117 110 104 111 47 115 100 98 120 45 100 105 115 99 111 114 100 45 100 106 45 98 111 116 47 100 106 98 111 116 46 40 42 67 111 109 109 97 110 100 72 97 110 100 108 101 114 41 46 72 97 110 100 108 101 77 101 115 115 97 103 101 40 48 120 99 52 50 48 49 49 56 52 97 48 44 32 48 120 99 52 50 48 48 98 57 53 54 48 44 32 48 120 99 52 50 48 49 56 99 48 55 48 41 10 9 47 104 111 109 101 47 115 117 110 104 111 47 103 111 47 115 114 99 47 103 105 116 104 117 98 46 99 111 109 47 115 117 110 104 111 47 115 100 98 120 45 100 105 115 99 111 114 100 45 100 106 45 98 111 116 47 100 106 98 111 116 47 99 111 109 109 97 110 100 46 103 111 58 53 54 32 43 48 120 49 56 54 10 103 105 116 104 117 98 46 99 111 109 47 115 117 110 104 111 47 115 100 98 120 45 100 105 115 99 111 114 100 45 100 106 45 98 111 116 47 100 106 98 111 116 46 40 42 68 74 66 111 116 41 46 72 97 110 100 108 101 78 101 119 77 101 115 115 97 103 101 40 48 120 99 52 50 48 48 98 48 98 101 48 44 32 48 120 99 52 50 48 48 98 57 53 54 48 44 32 48 120 99 52 50 48 49 56 99 48 55 48 41 10 9 47 104 111 109 101 47 115 117 110 104 111 47 103 111 47 115 114 99 47 103 105 116 104 117 98 46 99 111 109 47 115 117 110 104 111 47 115 100 98 120 45 100 105 115 99 111 114 100 45 100 106 45 98 111 116 47 100 106 98 111 116 47 104 97 110 100 108 101 114 115 46 103 111 58 51 56 32 43 48 120 49 53 98 10 103 105 116 104 117 98 46 99 111 109 47 115 117 110 104 111 47 115 100 98 120 45 100 105 115 99 111 114 100 45 100 106 45 98 111 116 47 100 106 98 111 116 46 40 42 68 74 66 111 116 41 46 72 97 110 100 108 101 78 101 119 77 101 115 115 97 103 101 45 102 109 40 48 120 99 52 50 48 48 98 57 53 54 48 44 32 48 120 99 52 50 48 49 56 99 48 55 48 41 10 9 47 104 111 109 101 47 115 117 110 104 111 47 103 111 47 115 114 99 47 103 105 116 104 117 98 46 99 111 109 47 115 117 110 104 111 47 115 100 98 120 45 100 105 115 99 111 114 100 45 100 106 45 98 111 116 47 100 106 98 111 116 47 100 106 98 111 116 46 103 111 58 51 48 32 43 48 120 51 101 10 103 105 116 104 117 98 46 99 111 109 47 98 119 109 97 114 114 105 110 47 100 105 115 99 111 114 100 103 111 46 109 101 115 115 97 103 101 67 114 101 97 116 101 69 118 101 110 116 72 97 110 100 108 101 114 46 72 97 110 100 108 101 40 48 120 99 52 50 48 48 49 101 101 57 48 44 32 48 120 99 52 50 48 48 98 57 53 54 48 44 32 48 120 54 102 49 56 56 48 44 32 48 120 99 52 50 48 49 56 99 48 55 48 41 10 9 47 104 111 109 101 47 115 117 110 104 111 47 103 111 47 115 114 99 47 103 105 116 104 117 98 46 99 111 109 47 98 119 109 97 114 114 105 110 47 100 105 115 99 111 114 100 103 111 47 101 118 101 110 116 104 97 110 100 108 101 114 115 46 103 111 58 52 57 54 32 43 48 120 53 55 10 99 114 101 97 116 101 100 32 98 121 32 103 105 116 104 117 98 46 99 111 109 47 98 119 109 97 114 114 105 110 47 100 105 115 99 111 114 100 103 111 46 40 42 83 101 115 115 105 111 110 41 46 104 97 110 100 108 101 10 9 47 104 111 109 101 47 115 117 110 104 111 47 103 111 47 115 114 99 47 103 105 116 104 117 98 46 99 111 109 47 98 119 109 97 114 114 105 110 47 100 105 115 99 111 114 100 103 111 47 101 118 101 110 116 46 103 111 58 49 54 50 32 43 48 120 49 49 49 10]
+2018/05/27 20:57:44 recoverd: runtime error: invalid memory address or nil pointer dereference
+2018/05/27 20:57:44 goroutine 68 [running]:
+runtime/debug.Stack(0xc42047e4c0, 0x2, 0x2)
+	/usr/lib/go-1.10/src/runtime/debug/stack.go:24 +0xa7
+github.com/sunho/sdbx-discord-dj-bot/djbot.(*DJBot).HandleNewMessage.func1()
+	/home/sunho/go/src/github.com/sunho/sdbx-discord-dj-bot/djbot/handlers.go:18 +0x9f
+panic(0x6f0600, 0x900a00)
+	/usr/lib/go-1.10/src/runtime/panic.go:502 +0x229
+github.com/sunho/sdbx-discord-dj-bot/djbot.(*CommandHandler).HandleMessage(0xc4201184a0, 0xc4200b8b40, 0xc42018c078)
+	/home/sunho/go/src/github.com/sunho/sdbx-discord-dj-bot/djbot/command.go:56 +0x186
+github.com/sunho/sdbx-discord-dj-bot/djbot.(*DJBot).HandleNewMessage(0xc4200b0b40, 0xc4200b8b40, 0xc42018c078)
+	/home/sunho/go/src/github.com/sunho/sdbx-discord-dj-bot/djbot/handlers.go:38 +0x15b
+github.com/sunho/sdbx-discord-dj-bot/djbot.(*DJBot).HandleNewMessage-fm(0xc4200b8b40, 0xc42018c078)
+	/home/sunho/go/src/github.com/sunho/sdbx-discord-dj-bot/djbot/djbot.go:30 +0x3e
+github.com/bwmarrin/discordgo.messageCreateEventHandler.Handle(0xc42001ee90, 0xc4200b8b40, 0x6f1880, 0xc42018c078)
+	/home/sunho/go/src/github.com/bwmarrin/discordgo/eventhandlers.go:496 +0x57
+created by github.com/bwmarrin/discordgo.(*Session).handle
+	/home/sunho/go/src/github.com/bwmarrin/discordgo/event.go:162 +0x111
+
+2018/05/27 22:38:23 timeout waiting for voice
+2018/05/27 22:38:32 timeout waiting for voice
+2018/05/27 22:40:22 Invalid url
+2018/05/27 22:40:31 Invalid url
+2018/05/27 22:40:33 timeout waiting for voice
+2018/05/27 22:40:42 timeout waiting for voice
+2018/05/27 22:41:02 timeout waiting for voice
+2018/05/27 22:42:37 timeout waiting for voice
+2018/05/27 22:43:26 timeout waiting for voice
+2018/05/27 22:43:44 asdf
+2018/05/27 22:45:08 asdf
+2018/05/27 22:47:38 asdf
+2018/05/27 22:47:49 asdf
+2018/05/27 22:47:49 timeout waiting for voice
+2018/05/27 22:49:16 asdf
+2018/05/27 22:49:16 439221989899763714
+2018/05/27 22:49:16 
+2018/05/27 22:49:27 asdf
+2018/05/27 22:49:27 timeout waiting for voice
+2018/05/27 22:50:00 asdf
+2018/05/27 22:50:00 439221989899763714
+2018/05/27 22:50:00 439221990369394701
+2018/05/27 22:50:03 asdf
+2018/05/27 22:50:28 [DG0] voice.go:356:wsListen() voice endpoint japan149.discord.gg:80 websocket closed unexpectantly, websocket: close 4014: Disconnected.
+2018/05/27 22:50:28 [DG0] voice.go:197:Close() error closing websocket, websocket: close sent
+2018/05/27 22:52:40 439221989899763714
+2018/05/27 22:52:40 439221990369394701
+2018/05/27 22:52:47 [DG0] voice.go:487:wsHeartbeat() error sending heartbeat to voice endpoint japan201.discord.gg:80, websocket: close sent
+2018/05/27 22:53:49 439221989899763714
+2018/05/27 22:53:49 439221990369394701
+2018/05/27 22:53:51 [DG0] voice.go:356:wsListen() voice endpoint japan259.discord.media:80 websocket closed unexpectantly, websocket: close 4014: Disconnected.
+2018/05/27 22:53:51 [DG0] voice.go:197:Close() error closing websocket, websocket: close sent
+2018/05/27 22:54:57 439221989899763714
+2018/05/27 22:54:57 439221990369394701
+2018/05/27 22:55:43 [DG0] voice.go:356:wsListen() voice endpoint japan871.discord.gg:80 websocket closed unexpectantly, websocket: close 4014: Disconnected.
+2018/05/27 22:55:43 [DG0] voice.go:197:Close() error closing websocket, websocket: close sent
+2018/05/27 22:55:48 439221989899763714
+2018/05/27 22:55:48 439221990369394701
+2018/05/27 22:55:55 [DG0] voice.go:356:wsListen() voice endpoint japan293.discord.gg:80 websocket closed unexpectantly, websocket: close 4014: Disconnected.
+2018/05/27 22:55:55 [DG0] voice.go:197:Close() error closing websocket, websocket: close sent
+2018/05/27 22:57:01 439221989899763714
+2018/05/27 22:57:01 439221990369394701
+2018/05/27 22:57:21 [DG0] voice.go:356:wsListen() voice endpoint japan871.discord.gg:80 websocket closed unexpectantly, websocket: close 4014: Disconnected.
+2018/05/27 22:57:21 [DG0] voice.go:197:Close() error closing websocket, websocket: close sent
+2018/05/27 22:57:28 439221989899763714
+2018/05/27 22:57:28 439221990369394701
+2018/05/27 22:57:31 asdaS
+2018/05/27 22:57:48 [DG0] voice.go:356:wsListen() voice endpoint japan871.discord.gg:80 websocket closed unexpectantly, websocket: close 4014: Disconnected.
+2018/05/27 22:57:48 [DG0] voice.go:197:Close() error closing websocket, websocket: close sent
+2018/05/27 22:57:54 439221989899763714
+2018/05/27 22:57:54 439221990369394701
+2018/05/27 22:57:56 asdaS
+2018/05/27 22:58:09 [DG0] voice.go:356:wsListen() voice endpoint japan871.discord.gg:80 websocket closed unexpectantly, websocket: close 4014: Disconnected.
+2018/05/27 22:58:09 [DG0] voice.go:197:Close() error closing websocket, websocket: close sent
+2018/05/27 22:58:21 439221989899763714
+2018/05/27 22:58:21 439221990369394701
+2018/05/27 22:58:56 439221989899763714
+2018/05/27 22:58:56 439221990369394701
+2018/05/27 22:59:00 asdaS
+2018/05/27 23:00:02 [DG0] voice.go:356:wsListen() voice endpoint japan681.discord.gg:80 websocket closed unexpectantly, websocket: close 4014: Disconnected.
+2018/05/27 23:00:02 [DG0] voice.go:197:Close() error closing websocket, websocket: close sent
+2018/05/27 23:00:08 439221989899763714
+2018/05/27 23:00:08 439221990369394701
+2018/05/27 23:00:12 asdaS
+2018/05/27 23:02:14 asdaS
+2018/05/27 23:02:14 asdaS
+2018/05/27 23:03:30 [DG0] voice.go:356:wsListen() voice endpoint japan871.discord.gg:80 websocket closed unexpectantly, websocket: close 4014: Disconnected.
+2018/05/27 23:03:30 [DG0] voice.go:197:Close() error closing websocket, websocket: close sent
+2018/05/27 23:05:32 [DG0] voice.go:356:wsListen() voice endpoint japan378.discord.gg:80 websocket closed unexpectantly, websocket: close 4014: Disconnected.
+2018/05/27 23:05:32 [DG0] voice.go:197:Close() error closing websocket, websocket: close sent
+2018/05/27 23:07:47 [DG0] voice.go:356:wsListen() voice endpoint japan666.discord.media:80 websocket closed unexpectantly, websocket: close 4014: Disconnected.
+2018/05/27 23:07:47 [DG0] voice.go:197:Close() error closing websocket, websocket: close sent
+2018/05/27 23:10:48 [DG0] voice.go:356:wsListen() voice endpoint japan894.discord.media:80 websocket closed unexpectantly, websocket: close 4014: Disconnected.
+2018/05/27 23:10:48 [DG0] voice.go:197:Close() error closing websocket, websocket: close sent
+2018/05/27 23:13:19 asf
+2018/05/27 23:13:19 exec: "youtube-dl": executable file not found in $PATH
+2018/05/27 23:17:53 asf
+2018/05/27 23:19:22 [DG0] voice.go:730:opusSender() udp write error, write udp 172.30.1.25:50930->103.102.161.2:50387: write: invalid argument
+2018/05/27 23:21:30 asf
+2018/05/27 23:25:32 asf
+2018/05/27 23:26:34 asf
+2018/05/27 23:28:35 asf
+2018/05/27 23:35:21 [DG0] voice.go:356:wsListen() voice endpoint singapore6.discord.gg:80 websocket closed unexpectantly, websocket: close 4014: Disconnected.
+2018/05/27 23:35:21 [DG0] voice.go:197:Close() error closing websocket, websocket: close sent
+2018/05/27 23:35:32 asf
+2018/05/27 23:36:10 asf
+2018/05/27 23:38:35 asf
+2018/05/27 23:41:07 asf
+2018/05/27 23:49:48 asf
+2018/05/27 23:52:52 EOF
+2018/05/27 23:53:07 asf
+2018/05/27 23:56:11 EOF
+2018/05/27 23:56:46 asf
+2018/05/27 23:57:57 EOF
+2018/05/27 23:57:57 asf
+2018/05/27 23:59:08 EOF
+2018/05/28 00:08:04 Invalid url
+2018/05/28 00:08:07 Invalid url
+2018/05/28 00:11:07 Invalid url
+2018/05/28 00:11:09 Invalid url
+2018/05/28 00:11:33 Invalid url
+2018/05/28 00:11:36 Invalid url
+2018/05/28 00:11:39 Invalid url
+2018/05/28 00:11:55 Invalid url
+2018/05/28 00:12:13 asf
+2018/05/28 00:12:33 Some ids are not valid
+2018/05/28 00:12:50 recoverd: runtime error: invalid memory address or nil pointer dereference
+2018/05/28 00:12:50 goroutine 101 [running]:
+runtime/debug.Stack(0xc4204984a8, 0x2, 0x2)
+	/usr/lib/go-1.10/src/runtime/debug/stack.go:24 +0xa7
+github.com/sunho/sdbx-discord-dj-bot/djbot.(*DJBot).HandleNewMessage.func1()
+	/home/sunho/go/src/github.com/sunho/sdbx-discord-dj-bot/djbot/handlers.go:18 +0x9f
+panic(0x71c140, 0x94ca80)
+	/usr/lib/go-1.10/src/runtime/panic.go:502 +0x229
+github.com/sunho/sdbx-discord-dj-bot/djbot.(*CommandHandler).HandleMessage(0xc42011a520, 0xc4200bb200, 0xc42056e078)
+	/home/sunho/go/src/github.com/sunho/sdbx-discord-dj-bot/djbot/command.go:59 +0x24c
+github.com/sunho/sdbx-discord-dj-bot/djbot.(*DJBot).HandleNewMessage(0xc4200b7040, 0xc4200bb200, 0xc42056e078)
+	/home/sunho/go/src/github.com/sunho/sdbx-discord-dj-bot/djbot/handlers.go:38 +0x15b
+github.com/sunho/sdbx-discord-dj-bot/djbot.(*DJBot).HandleNewMessage-fm(0xc4200bb200, 0xc42056e078)
+	/home/sunho/go/src/github.com/sunho/sdbx-discord-dj-bot/djbot/djbot.go:30 +0x3e
+github.com/bwmarrin/discordgo.messageCreateEventHandler.Handle(0xc42001ef40, 0xc4200bb200, 0x71d3c0, 0xc42056e078)
+	/home/sunho/go/src/github.com/bwmarrin/discordgo/eventhandlers.go:496 +0x57
+created by github.com/bwmarrin/discordgo.(*Session).handle
+	/home/sunho/go/src/github.com/bwmarrin/discordgo/event.go:162 +0x111
+
+2018/05/28 00:48:09 asf
+2018/05/28 00:49:29 asf
+2018/05/28 00:50:17 asf
+2018/05/28 00:51:06 asf
+2018/05/28 00:51:52 asf
+2018/05/28 00:53:21 asf

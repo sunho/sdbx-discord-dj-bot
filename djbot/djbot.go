@@ -9,7 +9,7 @@ import (
 type DJBot struct {
 	Config
 	Discord        *discordgo.Session
-	RequestManager *RequestManager
+	RequestHandler *RequestHandler
 	CommandHandler *CommandHandler
 	MsgC           chan *discordgo.MessageSend
 }
@@ -23,7 +23,7 @@ func New(config Config) (*DJBot, error) {
 	dj := &DJBot{}
 	dj.MsgC = make(chan *discordgo.MessageSend)
 	dj.CommandHandler = NewCommandHandler(dj)
-	dj.RequestManager = NewRequestManager(dj)
+	dj.RequestHandler = NewRequestHandler(dj)
 	dj.Config = config
 	dj.Discord = dg
 
@@ -39,7 +39,7 @@ func (dj *DJBot) Open() error {
 	}
 
 	go dj.run()
-	go dj.RequestManager.run()
+	go dj.RequestHandler.run()
 	return nil
 }
 

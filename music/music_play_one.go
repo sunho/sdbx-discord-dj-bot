@@ -12,10 +12,11 @@ import (
 
 type Song struct {
 	provider.Song
-	RequestorID string
+	Requestor *discordgo.Member
 }
 
-func playOne(conn *discordgo.VoiceConnection, stopC chan struct{}, url string) {
+func playOne(conn *discordgo.VoiceConnection, bufferSize int, skipC chan struct{}, url string) {
+	log.Println("asf")
 	ytdl := exec.Command("youtube-dl", "-v", "-f", "bestaudio", "-o", "-", url)
 	ytdlout, err := ytdl.StdoutPipe()
 	if err != nil {
@@ -30,7 +31,7 @@ func playOne(conn *discordgo.VoiceConnection, stopC chan struct{}, url string) {
 		log.Println(err)
 		return
 	}
-	ffmpegbuf := bufio.NewReaderSize(ffmpegout, 16384)
+	ffmpegbuf := bufio.NewReaderSize(ffmpegout, bufferSize)
 
 	dca := exec.Command("dca")
 	dca.Stdin = ffmpegbuf
@@ -42,7 +43,7 @@ func playOne(conn *discordgo.VoiceConnection, stopC chan struct{}, url string) {
 	defer func() {
 		go dca.Wait()
 	}()
-	dcabuf := bufio.NewReaderSize(dcaout, 16384)
+	dcabuf := bufio.NewReaderSize(dcaout, bufferSize)
 
 	err = ytdl.Start()
 	if err != nil {
@@ -80,7 +81,7 @@ func playOne(conn *discordgo.VoiceConnection, stopC chan struct{}, url string) {
 	defer conn.Speaking(false)
 	for {
 		select {
-		case <-stopC:
+		case <-skipC:
 			return
 		default:
 			err = binary.Read(dcabuf, binary.LittleEndian, &opuslen)

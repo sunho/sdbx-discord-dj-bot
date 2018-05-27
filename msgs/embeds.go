@@ -19,9 +19,8 @@ func SongMsg(msg string, song provider.Song, requestor *discordgo.Member) *disco
 		Title: msg,
 		Fields: []*discordgo.MessageEmbedField{
 			&discordgo.MessageEmbedField{
-				Name:   "이름",
-				Value:  song.Name,
-				Inline: true,
+				Name:  "이름",
+				Value: song.Name,
 			},
 			&discordgo.MessageEmbedField{
 				Name:  "주소",
@@ -32,8 +31,11 @@ func SongMsg(msg string, song provider.Song, requestor *discordgo.Member) *disco
 				Value: song.Length.String(),
 			},
 		},
+		Thumbnail: &discordgo.MessageEmbedThumbnail{
+			URL: song.Thumbnail,
+		},
 		Footer: &discordgo.MessageEmbedFooter{
-			Text:    name,
+			Text:    name + " 선곡",
 			IconURL: requestor.User.AvatarURL("64"),
 		},
 	}
@@ -42,5 +44,23 @@ func SongMsg(msg string, song provider.Song, requestor *discordgo.Member) *disco
 		Embed: embed,
 	}
 
+	return msg2
+}
+
+func SongPlayingMsg(song provider.Song, requestor *discordgo.Member) *discordgo.MessageSend {
+	return SongMsg(SongPlaying, song, requestor)
+}
+
+func SongAddedMsg(song provider.Song, requestor *discordgo.Member) *discordgo.MessageSend {
+	return SongMsg(SongAdded, song, requestor)
+}
+
+func SongRemovedMsg(song provider.Song, requestor *discordgo.Member) *discordgo.MessageSend {
+	return SongMsg(SongRemoved, song, requestor)
+}
+
+func SongNPMsg(song provider.Song, requestor *discordgo.Member) *discordgo.MessageSend {
+	msg2 := SongMsg(SongNP, song, requestor)
+	msg2.Embed.Fields[2].Name = "남은 시간"
 	return msg2
 }

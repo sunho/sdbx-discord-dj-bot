@@ -15,15 +15,15 @@ type Request struct {
 	CallBack func(interface{})
 }
 
-type RequestManager struct {
+type RequestHandler struct {
 	C        chan *Request
 	DC       chan *Request
 	dj       *DJBot
 	requests map[string]*Request
 }
 
-func NewRequestManager(dj *DJBot) *RequestManager {
-	return &RequestManager{
+func NewRequestHandler(dj *DJBot) *RequestHandler {
+	return &RequestHandler{
 		C:        make(chan *Request),
 		DC:       make(chan *Request),
 		dj:       dj,
@@ -31,7 +31,7 @@ func NewRequestManager(dj *DJBot) *RequestManager {
 	}
 }
 
-func (rm *RequestManager) HandleMessage(msg *discordgo.MessageCreate) {
+func (rm *RequestHandler) HandleMessage(msg *discordgo.MessageCreate) {
 	if r, ok := rm.requests[msg.Author.ID]; ok {
 		d, err := strconv.Atoi(msg.Content)
 		if err == nil {
@@ -46,7 +46,7 @@ func (rm *RequestManager) HandleMessage(msg *discordgo.MessageCreate) {
 	}
 }
 
-func (rm *RequestManager) run() {
+func (rm *RequestHandler) run() {
 	for {
 		select {
 		case r := <-rm.C:
