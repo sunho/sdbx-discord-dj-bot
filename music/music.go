@@ -42,6 +42,28 @@ func (m *Music) initProviders() error {
 	return nil
 }
 
+func (m *Music) RemoveSong(mem *discordgo.Member, index int) error {
+	songs := m.Mp.GetSongs()
+	if index < 0 || index >= len(songs) {
+		return fmt.Errorf("Out of range")
+	}
+
+	song := songs[index]
+
+	for _, user := range m.dj.TrustedUsers {
+		if user == mem.User.ID {
+			goto handle
+		}
+	}
+
+	if song.Requestor.User.ID != mem.User.ID {
+		return fmt.Errorf("Permission denied")
+	}
+
+handle:
+	return m.Mp.RemoveSong(song)
+}
+
 func (m *Music) PrepareIfNotReady() error {
 	if m.Mp.GetConnection() == nil {
 		vc, err := m.dj.Discord.ChannelVoiceJoin(m.dj.GuildID, m.dj.VoiceChannelID, false, true)

@@ -98,6 +98,21 @@ func (m *MusicCommander) FindAction(dj *djbot.DJBot, msg *discordgo.MessageCreat
 	return nil
 }
 
+func (m *MusicCommander) RemoveAction(dj *djbot.DJBot, msg *discordgo.MessageCreate) *discordgo.MessageSend {
+	content := msg.Content
+	index := -1
+	fmt.Sprintf(content, "%d", &index)
+
+	mem, _ := dj.Discord.GuildMember(dj.GuildID, msg.Author.ID)
+
+	err := m.m.RemoveSong(mem, index)
+	if err != nil {
+		return &discordgo.MessageSend{Content: msgs.Fail}
+	}
+
+	return nil
+}
+
 func (m *MusicCommander) DisconnectAction(sess *discordgo.Session, msg *discordgo.MessageCreate) *discordgo.MessageSend {
 	return nil
 }

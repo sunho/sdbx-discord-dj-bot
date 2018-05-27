@@ -8,4 +8,5 @@ const (
 	SongNP      = ":arrow_forward: 이 곡이 재생중입니다."
 	SongQueue   = ":clipboard: 현재 음악큐"
 	SongSearch  = ":mag_right: %s 검색 결과"
+	Help        = "사용법"
 )

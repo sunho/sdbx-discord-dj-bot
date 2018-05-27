@@ -108,3 +108,26 @@ func SongQueueMsg(songs []provider.Song, members []*discordgo.Member) *discordgo
 		Embed: embed,
 	}
 }
+
+func HelpMsg(cmds []map[string]string) *discordgo.MessageSend {
+	fields := []*discordgo.MessageEmbedField{}
+	for _, cmd := range cmds {
+		others := ""
+		if len(cmd["aliases"]) != 0 {
+			others = "또는 " + "\n"
+		}
+		fields = append(fields, &discordgo.MessageEmbedField{
+			Name:  cmd["name"],
+			Value: others + cmd["usage"],
+		})
+	}
+
+	embed := &discordgo.MessageEmbed{
+		Title:  Help,
+		Fields: fields,
+	}
+
+	return &discordgo.MessageSend{
+		Embed: embed,
+	}
+}
