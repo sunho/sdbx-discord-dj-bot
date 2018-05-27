@@ -17,10 +17,12 @@ const (
 )
 
 const (
-	TopicAdded   = "add"
-	TopicRemoved = "remove"
-	TopicSkipped = "skip"
-	TopicPlaying = "play"
+	TopicAdded        = "add"
+	TopicRemoved      = "remove"
+	TopicSkipped      = "skip"
+	TopicPlaying      = "play"
+	TopicCleared      = "clear"
+	TopicDisconnected = "disconnect"
 )
 
 type MusicPlayer struct {
@@ -43,6 +45,111 @@ func NewMusicPlayer() *MusicPlayer {
 		bufferSize: 10000000,
 		skipC:      make(chan struct{}),
 	}
+}
+
+func (mp *MusicPlayer) Connect(connection *discordgo.VoiceConnection) error {
+	mp.mu.Lock()
+	defer mp.mu.Unlock()
+
+	if mp.connection != nil {
+		return fmt.Errorf("Already connected")
+	}
+	mp.connection = connection
+
+	return nil
+}
+
+func (mp *MusicPlayer) Disconnect() error {
+	mp.mu.Lock()
+	defer mp.mu.Unlock()
+
+	if mp.connection == nil {
+		return fmt.Errorf("Not connected")
+	}
+	mp.connection.Disconnect()
+	mp.connection = nil
+	<-mp.Emitter.Emit(TopicDisconnected)
+
+	return nil
+}
+
+func (mp *MusicPlayer) Play() error {
+	mp.mu.Lock()
+	defer mp.mu.Unlock()
+
+	if mp.state == Playing {
+		return fmt.Errorf("Already playing")
+	}
+	go mp.play()
+
+	return nil
+}
+
+func (mp *MusicPlayer) play() {
+	mp.SetState(Playing)
+	for {
+		mp.mu.Lock()
+		if len(mp.songs) == 0 {
+			mp.current = nil
+			mp.mu.Unlock()
+			break
+		}
+		mp.current = mp.songs[0]
+		mp.songs = mp.songs[1:]
+		current := mp.current
+		bufferSize := mp.bufferSize
+		mp.songEndTime = time.Now().Add(current.Length + time.Second)
+		mp.mu.Unlock()
+		<-mp.Emitter.Emit(TopicPlaying, current)
+
+		playOne(mp.connection, bufferSize, mp.skipC, current.URL)
+	}
+
+	mp.SetState(NotPlaying)
+	mp.Disconnect()
+}
+
+func (mp *MusicPlayer) Stop() error {
+	mp.mu.Lock()
+	defer mp.mu.Unlock()
+
+	if mp.state == NotPlaying {
+		return fmt.Errorf("You can't stop stopped things")
+	}
+	mp.songs = []*Song{}
+
+	go func() {
+		mp.skipC <- struct{}{}
+	}()
+
+	return nil
+}
+
+func (mp *MusicPlayer) Clear() error {
+	mp.mu.Lock()
+	defer mp.mu.Unlock()
+
+	if mp.state != Playing {
+		return fmt.Errorf("No song is playing")
+	}
+
+	mp.songs = []*Song{}
+	<-mp.Emitter.Emit(TopicCleared)
+
+	return nil
+}
+
+func (mp *MusicPlayer) Skip() error {
+	mp.mu.Lock()
+	defer mp.mu.Unlock()
+
+	if mp.state != Playing {
+		return fmt.Errorf("No song is playing")
+	}
+	mp.skipC <- struct{}{}
+	<-mp.Emitter.Emit(TopicSkipped)
+
+	return nil
 }
 
 func (mp *MusicPlayer) GetSongs() []*Song {
@@ -126,95 +233,4 @@ func (mp *MusicPlayer) GetRemaningTime() time.Duration {
 	}
 
 	return mp.songEndTime.Sub(time.Now())
-}
-
-func (mp *MusicPlayer) Skip() error {
-	mp.mu.Lock()
-	defer mp.mu.Unlock()
-
-	if mp.state != Playing {
-		return fmt.Errorf("No song is playing")
-	}
-	mp.skipC <- struct{}{}
-	<-mp.Emitter.Emit(TopicSkipped)
-
-	return nil
-}
-
-func (mp *MusicPlayer) Play() error {
-	mp.mu.Lock()
-	defer mp.mu.Unlock()
-
-	if mp.state == Playing {
-		return fmt.Errorf("Already playing")
-	}
-	go mp.play()
-
-	return nil
-}
-
-func (mp *MusicPlayer) play() {
-	mp.SetState(Playing)
-	for {
-		mp.mu.Lock()
-		if len(mp.songs) == 0 {
-			mp.current = nil
-			mp.mu.Unlock()
-			break
-		}
-		mp.current = mp.songs[0]
-		mp.songs = mp.songs[1:]
-		current := mp.current
-		bufferSize := mp.bufferSize
-		mp.songEndTime = time.Now().Add(current.Length + time.Second)
-		mp.mu.Unlock()
-		<-mp.Emitter.Emit(TopicPlaying, current)
-
-		playOne(mp.connection, bufferSize, mp.skipC, current.URL)
-	}
-
-	mp.SetState(NotPlaying)
-	mp.Disconnect()
-}
-
-func (mp *MusicPlayer) Stop() error {
-	mp.mu.Lock()
-	defer mp.mu.Unlock()
-
-	if mp.state == NotPlaying {
-		return fmt.Errorf("You can't stop stopped things")
-	}
-	mp.songs = []*Song{}
-
-	go func() {
-		mp.skipC <- struct{}{}
-	}()
-
-	return nil
-}
-
-func (mp *MusicPlayer) Connect(connection *discordgo.VoiceConnection) error {
-	mp.mu.Lock()
-	defer mp.mu.Unlock()
-
-	if mp.connection != nil {
-		return fmt.Errorf("Already connected")
-	}
-	mp.connection = connection
-
-	return nil
-}
-
-func (mp *MusicPlayer) Disconnect() error {
-	mp.mu.Lock()
-	defer mp.mu.Unlock()
-
-	if mp.connection == nil {
-		return fmt.Errorf("Not connected")
-	}
-	mp.connection.Disconnect()
-
-	mp.connection = nil
-
-	return nil
 }

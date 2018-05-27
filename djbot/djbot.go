@@ -22,8 +22,8 @@ func New(config Config) (*DJBot, error) {
 
 	dj := &DJBot{}
 	dj.MsgC = make(chan *discordgo.MessageSend)
-	dj.CommandHandler = NewCommandHandler(dj)
-	dj.RequestHandler = NewRequestHandler(dj)
+	dj.CommandHandler = newCommandHandler(dj)
+	dj.RequestHandler = newRequestHandler(dj)
 	dj.Config = config
 	dj.Discord = dg
 

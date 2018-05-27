@@ -53,9 +53,8 @@ func goAction(dj *djbot.DJBot, msg *discordgo.MessageCreate) *discordgo.MessageS
 
 	msgContent := goMsgs[rand.Intn(len(goMsgs))]
 
-	msg2 := &discordgo.MessageSend{
+	return &discordgo.MessageSend{
 		Content: msgContent,
 		Files:   []*discordgo.File{&discordgo.File{filename, contentType, reader2}},
 	}
-	return msg2
 }

@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/sunho/sdbx-discord-dj-bot/consts"
 	"github.com/sunho/sdbx-discord-dj-bot/djbot"
 	"github.com/sunho/sdbx-discord-dj-bot/msgs"
 	"github.com/sunho/sdbx-discord-dj-bot/music/provider"
@@ -12,14 +13,16 @@ import (
 )
 
 type Music struct {
-	providers map[string]provider.Provider
 	Mp        *MusicPlayer
+	vm        *VoteManager
+	providers map[string]provider.Provider
 	dj        *djbot.DJBot
 }
 
 func New(dj *djbot.DJBot) (*Music, error) {
 	m := &Music{
 		Mp:        NewMusicPlayer(),
+		vm:        newVoterManager(),
 		providers: make(map[string]provider.Provider),
 		dj:        dj,
 	}
@@ -42,26 +45,67 @@ func (m *Music) initProviders() error {
 	return nil
 }
 
-func (m *Music) RemoveSong(mem *discordgo.Member, index int) error {
-	songs := m.Mp.GetSongs()
-	if index < 0 || index >= len(songs) {
-		return fmt.Errorf("Out of range")
+func (m *Music) Vote(topic string, user string) error {
+	vote := m.vm.Get(topic)
+	if vote == nil {
+		vote = m.makeVote(topic)
+		m.vm.Set(topic, vote)
+	}
+	vote.Approve(user)
+	m.vm.Update(m.getPeople())
+
+	return nil
+}
+
+func (m *Music) getPeople() int {
+	ch, err := m.dj.Discord.Channel(m.dj.ChannelID)
+	if err != nil {
+		return 0
 	}
 
-	song := songs[index]
+	return len(ch.Recipients)
+}
 
-	for _, user := range m.dj.TrustedUsers {
-		if user == mem.User.ID {
-			goto handle
+func (m *Music) makeVote(topic string) *Vote {
+	vote := newVote()
+
+	switch topic {
+	case "skip":
+		vote.Callback = func() {
+			err := m.Mp.Skip()
+			if err != nil {
+				log.Println(err)
+			}
 		}
+		vote.Global = false
+
+	case "clear":
+		vote.Callback = func() {
+			err := m.Mp.Clear()
+			if err != nil {
+				log.Println(err)
+			}
+		}
+		vote.Global = true
+
+	case "disconnect":
+		vote.Callback = func() {
+			err := m.Mp.Stop()
+			if err != nil {
+				log.Println(err)
+			}
+
+			err = m.Mp.Disconnect()
+			if err != nil {
+				log.Println(err)
+			}
+		}
+
+	default:
+		log.Println("Invalid topic in makeVote:", topic)
 	}
 
-	if song.Requestor.User.ID != mem.User.ID {
-		return fmt.Errorf("Permission denied")
-	}
-
-handle:
-	return m.Mp.RemoveSong(song)
+	return vote
 }
 
 func (m *Music) PrepareIfNotReady() error {
@@ -86,6 +130,28 @@ func (m *Music) PrepareIfNotReady() error {
 
 	return nil
 }
+
+func (m *Music) AddSong(requestor *discordgo.Member, providerName string, url string) error {
+	p, ok := m.providers[providerName]
+	if !ok {
+		return fmt.Errorf("No such provider")
+	}
+
+	song, err := p.URL(url)
+	if err != nil {
+		return err
+	}
+
+	song2 := &Song{
+		Song:      song[0],
+		Requestor: requestor,
+	}
+
+	m.Mp.AddSong(song2)
+
+	return nil
+}
+
 func (m *Music) AddFirstSong(requestor *discordgo.Member, providerName string, keyword string) error {
 	p, ok := m.providers[providerName]
 	if !ok {
@@ -106,8 +172,9 @@ func (m *Music) AddFirstSong(requestor *discordgo.Member, providerName string, k
 		Requestor: requestor,
 	})
 
-	return m.PrepareIfNotReady()
+	return nil
 }
+
 func (m *Music) SearchSong(requestor *discordgo.Member, providerName string, keyword string) error {
 	p, ok := m.providers[providerName]
 	if !ok {
@@ -131,17 +198,17 @@ func (m *Music) SearchSong(requestor *discordgo.Member, providerName string, key
 	}
 
 	m.dj.RequestHandler.C <- &djbot.Request{
-		Title:    fmt.Sprintf(msgs.SongSearch, keyword),
+		Title:    fmt.Sprintf(consts.SongSearch, keyword),
 		UserID:   requestor.User.ID,
 		List:     strList,
 		DataList: dataList,
-		CallBack: m.findRequestCallback,
+		CallBack: m.searchRequestCallback,
 	}
 
 	return nil
 }
 
-func (m *Music) findRequestCallback(obj interface{}) {
+func (m *Music) searchRequestCallback(obj interface{}) {
 	song := obj.(*Song)
 	m.Mp.AddSong(song)
 
@@ -151,24 +218,26 @@ func (m *Music) findRequestCallback(obj interface{}) {
 	}
 }
 
-func (m *Music) AddSongByURL(requestor *discordgo.Member, providerName string, url string) error {
-	p, ok := m.providers[providerName]
-	if !ok {
-		return fmt.Errorf("No such provider")
+func (m *Music) RemoveSong(mem *discordgo.Member, index int) error {
+	songs := m.Mp.GetSongs()
+	if index < 0 || index >= len(songs) {
+		return fmt.Errorf("Out of range")
 	}
 
-	song, err := p.URL(url)
-	if err != nil {
-		return err
+	song := songs[index]
+
+	for _, user := range m.dj.TrustedUsers {
+		if user == mem.User.ID {
+			goto handle
+		}
 	}
 
-	song2 := &Song{
-		Song:      song[0],
-		Requestor: requestor,
+	if song.Requestor.User.ID != mem.User.ID {
+		return fmt.Errorf("Permission denied")
 	}
 
-	m.Mp.AddSong(song2)
-	return nil
+handle:
+	return m.Mp.RemoveSong(song)
 }
 
 func (m *Music) Run() {
@@ -177,12 +246,15 @@ func (m *Music) Run() {
 	added := e.On(TopicAdded)
 	removed := e.On(TopicRemoved)
 	skipped := e.On(TopicSkipped)
+	cleared := e.On(TopicCleared)
+	disconnected := e.On(TopicDisconnected)
 
 	for {
 		select {
 		case event := <-playing:
 			song := event.Args[0].(*Song)
 			m.dj.MsgC <- msgs.SongPlayingMsg(song.Song, song.Requestor)
+			m.vm.Delete("skip")
 
 		case event := <-added:
 			song := event.Args[0].(*Song)
@@ -193,7 +265,13 @@ func (m *Music) Run() {
 			m.dj.MsgC <- msgs.SongRemovedMsg(song.Song, song.Requestor)
 
 		case <-skipped:
-			m.dj.MsgC <- &discordgo.MessageSend{Content: msgs.SongSkipped}
+			m.dj.MsgC <- &discordgo.MessageSend{Content: consts.SongSkipped}
+
+		case <-cleared:
+			m.dj.MsgC <- &discordgo.MessageSend{Content: consts.SongCleared}
+
+		case <-disconnected:
+			m.vm.Clear()
 		}
 	}
 }

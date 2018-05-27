@@ -44,8 +44,6 @@ func playOne(conn *discordgo.VoiceConnection, bufferSize int, skipC chan struct{
 	}()
 	dcabuf := bufio.NewReaderSize(dcaout, bufferSize)
 
-	log.Println(bufferSize)
-
 	err = ytdl.Start()
 	if err != nil {
 		log.Println(err)

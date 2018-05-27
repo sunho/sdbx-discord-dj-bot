@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/sunho/sdbx-discord-dj-bot/consts"
 	"github.com/sunho/sdbx-discord-dj-bot/msgs"
 )
 
@@ -23,7 +24,7 @@ type RequestHandler struct {
 	requests map[string]*Request
 }
 
-func NewRequestHandler(dj *DJBot) *RequestHandler {
+func newRequestHandler(dj *DJBot) *RequestHandler {
 	return &RequestHandler{
 		C:        make(chan *Request),
 		DC:       make(chan *Request),
@@ -32,12 +33,12 @@ func NewRequestHandler(dj *DJBot) *RequestHandler {
 	}
 }
 
-func (rm *RequestHandler) HandleMessage(msg *discordgo.MessageCreate) {
+func (rm *RequestHandler) handleMessage(msg *discordgo.MessageCreate) {
 	if r, ok := rm.requests[msg.Author.ID]; ok {
 		d, err := strconv.Atoi(msg.Content)
 		if err == nil {
 			if d < 0 || d > len(r.DataList) {
-				rm.dj.MsgC <- &discordgo.MessageSend{Content: msgs.OutOfRange}
+				rm.dj.MsgC <- &discordgo.MessageSend{Content: consts.OutOfRange}
 				return
 			}
 

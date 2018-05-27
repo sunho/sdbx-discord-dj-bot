@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/sunho/sdbx-discord-dj-bot/msgs"
+	"github.com/sunho/sdbx-discord-dj-bot/consts"
 )
 
 type Command struct {
@@ -33,14 +33,14 @@ type CommandHandler struct {
 	dj       *DJBot
 }
 
-func NewCommandHandler(dj *DJBot) *CommandHandler {
+func newCommandHandler(dj *DJBot) *CommandHandler {
 	return &CommandHandler{
 		Commands: []Command{},
 		dj:       dj,
 	}
 }
 
-func (ch *CommandHandler) HandleMessage(sess *discordgo.Session, msg *discordgo.MessageCreate) {
+func (ch *CommandHandler) handleMessage(sess *discordgo.Session, msg *discordgo.MessageCreate) {
 	content := msg.Content
 	delimitter := ch.dj.Delimitter
 	if !strings.HasPrefix(content, delimitter) {
@@ -56,13 +56,15 @@ func (ch *CommandHandler) HandleMessage(sess *discordgo.Session, msg *discordgo.
 
 	for _, cmd := range ch.Commands {
 		if cmd.isPreformable(prefix) {
-			msg2 := cmd.Action(ch.dj, msg)
-			if msg != nil {
-				ch.dj.MsgC <- msg2
-			}
+			go func() {
+				msg2 := cmd.Action(ch.dj, msg)
+				if msg != nil {
+					ch.dj.MsgC <- msg2
+				}
+			}()
 			return
 		}
 	}
 
-	ch.dj.MsgC <- &discordgo.MessageSend{Content: msgs.NoSuchCommand}
+	ch.dj.MsgC <- &discordgo.MessageSend{Content: consts.NoSuchCommand}
 }
