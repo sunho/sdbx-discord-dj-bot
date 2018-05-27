@@ -23,13 +23,13 @@ func (dj *DJBot) HandleNewMessage(sess *discordgo.Session, msg *discordgo.Messag
 		return
 	}
 
-	for _, user := range dj.Config.TrustedUsers {
+	for _, user := range dj.TrustedUsers {
 		if msg.Author.ID == user {
 			goto handle
 		}
 	}
 
-	if msg.ChannelID != dj.Config.ChannelID {
+	if msg.ChannelID != dj.ChannelID {
 		return
 	}
 

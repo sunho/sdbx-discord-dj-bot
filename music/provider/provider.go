@@ -5,7 +5,7 @@ import "time"
 type Song struct {
 	Name      string
 	URL       string
-	Duration  time.Duration
+	Length    time.Duration
 	Thumbnail string
 }
 

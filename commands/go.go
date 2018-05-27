@@ -2,6 +2,7 @@ package commands
 
 import (
 	"io/ioutil"
+	"log"
 	"math/rand"
 	"net/http"
 	"os"
@@ -10,7 +11,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-const goMsgs = [...]string{
+var goMsgs = [...]string{
 	"Write in Go!",
 	"고가 모든걸 해결합니다",
 	"'GO made me FREE'",
@@ -25,7 +26,7 @@ const goMsgs = [...]string{
 	"구글에서 만들었으니 당연히 갓언어겠죠?",
 }
 
-func GoAction(sess *discordgo.Session, content string) *discordgo.MessageSend {
+func goAction(sess *discordgo.Session, msg *discordgo.MessageCreate) *discordgo.MessageSend {
 	filenames := make([]string, 0)
 
 	filepath.Walk("gophers", func(path string, f os.FileInfo, err error) error {
@@ -37,6 +38,7 @@ func GoAction(sess *discordgo.Session, content string) *discordgo.MessageSend {
 
 	reader, err := ioutil.ReadFile(filename)
 	if err != nil {
+		log.Println(err)
 		return nil
 	}
 
@@ -44,14 +46,15 @@ func GoAction(sess *discordgo.Session, content string) *discordgo.MessageSend {
 
 	reader2, err := os.Open(filename)
 	if err != nil {
+		log.Println(err)
 		return nil
 	}
 
-	msgContent := goMsgs[ran.Intn(len(goMasgs))]
+	msgContent := goMsgs[rand.Intn(len(goMsgs))]
 
-	msg := &discordgo.MessageSend{
-		Content: ss[rand.Intn(len(ss))],
-		Files:   []*discordgo.File{&discordgo.File{filename, msgContent, reader2}},
+	msg2 := &discordgo.MessageSend{
+		Content: msgContent,
+		Files:   []*discordgo.File{&discordgo.File{filename, contentType, reader2}},
 	}
-	return msg
+	return msg2
 }

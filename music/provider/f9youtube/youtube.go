@@ -1,4 +1,4 @@
-package music
+package f9youtube
 
 import (
 	"fmt"
@@ -17,7 +17,7 @@ type Youtube struct {
 	service *youtube.Service
 }
 
-func NewYoutube(token string) (*Youtube, error) {
+func New(token string) (*Youtube, error) {
 	service, err := makeYoutubeService(token)
 	if err != nil {
 		return nil, err
@@ -120,7 +120,7 @@ func (y *Youtube) getSongs(ids []string) ([]provider.Song, error) {
 		songs = append(songs, provider.Song{
 			Name:      video.Snippet.Title,
 			URL:       "https://www.youtube.com/watch?v=" + ids[i],
-			Duration:  dur,
+			Length:    dur,
 			Thumbnail: thumbnail,
 		})
 	}

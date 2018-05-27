@@ -15,12 +15,12 @@ type Command struct {
 }
 
 func (c *Command) isPerfomable(content string) bool {
-	if strings.HasPrefix(content, c.Name+" ") {
+	if strings.HasPrefix(content, c.Name+" ") || content == c.Name {
 		return true
 	}
 
 	for _, alias := range c.Aliases {
-		if strings.HasPrefix(content, alias+" ") {
+		if strings.HasPrefix(content, alias+" ") || content == alias {
 			return true
 		}
 	}
@@ -43,7 +43,7 @@ func NewCommandHandler(dj *DJBot) *CommandHandler {
 func (ch *CommandHandler) HandleMessage(sess *discordgo.Session, msg *discordgo.MessageCreate) {
 	content := msg.Content
 
-	delimitter := ch.dj.Config.Delimitter
+	delimitter := ch.dj.Delimitter
 	if !strings.HasPrefix(content, delimitter) {
 		return
 	}

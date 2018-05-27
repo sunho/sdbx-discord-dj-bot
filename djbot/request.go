@@ -55,7 +55,7 @@ func (rm *RequestManager) run() {
 
 			// timeout
 			go func() {
-				wait := rm.dj.Config.RequestWait
+				wait := rm.dj.RequestWait
 				time.Sleep(time.Duration(wait) * time.Second)
 				rm.DC <- r
 			}()

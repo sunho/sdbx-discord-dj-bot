@@ -5,19 +5,14 @@ import (
 	"encoding/binary"
 	"log"
 	"os/exec"
-	"time"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/sunho/sdbx-discord-dj-bot/music/provider"
 )
 
 type Song struct {
-	Requester   string
-	RequesterID string
-	Name        string
-	Duration    time.Duration
-	Type        string
-	URL         string
-	Thumbnail   string
+	provider.Song
+	RequestorID string
 }
 
 func playOne(conn *discordgo.VoiceConnection, stopC chan struct{}, url string) {

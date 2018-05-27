@@ -7,10 +7,10 @@ import (
 )
 
 type DJBot struct {
+	Config
 	Discord        *discordgo.Session
 	RequestManager *RequestManager
 	CommandHandler *CommandHandler
-	Config         Config
 	MsgC           chan *discordgo.MessageSend
 }
 
@@ -53,7 +53,7 @@ func (dj *DJBot) run() {
 		select {
 		case msg := <-dj.MsgC:
 			if msg != nil {
-				ch := dj.Config.ChannelID
+				ch := dj.ChannelID
 				_, err := dj.Discord.ChannelMessageSendComplex(ch, msg)
 				if err != nil {
 					log.Println(err)
