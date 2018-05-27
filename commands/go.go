@@ -2,20 +2,17 @@ package commands
 
 import (
 	"io/ioutil"
+	"log"
 	"math/rand"
 	"net/http"
 	"os"
 	"path/filepath"
 
 	"github.com/bwmarrin/discordgo"
-	djbot "github.com/ksunhokim123/sdbx-discord-dj-bot"
-	"github.com/ksunhokim123/sdbx-discord-dj-bot/stypes"
+	"github.com/sunho/sdbx-discord-dj-bot/djbot"
 )
 
-type GOISAWESOME struct {
-}
-
-var ss = []string{
+var goMsgs = [...]string{
 	"Write in Go!",
 	"고가 모든걸 해결합니다",
 	"'GO made me FREE'",
@@ -30,33 +27,34 @@ var ss = []string{
 	"구글에서 만들었으니 당연히 갓언어겠죠?",
 }
 
-func (g *GOISAWESOME) Handle(sess *djbot.Session, parms []interface{}) {
-	d := make([]string, 0)
+func goAction(dj *djbot.DJBot, msg *discordgo.MessageCreate) *discordgo.MessageSend {
+	filenames := make([]string, 0)
+
 	filepath.Walk("gophers", func(path string, f os.FileInfo, err error) error {
-		d = append(d, path)
+		filenames = append(filenames, path)
 		return nil
 	})
-	filename := d[rand.Intn(len(d))]
+
+	filename := filenames[rand.Intn(len(filenames))]
+
 	reader, err := ioutil.ReadFile(filename)
 	if err != nil {
-		return
+		log.Println(err)
+		return nil
 	}
-	content := http.DetectContentType(reader)
+
+	contentType := http.DetectContentType(reader)
+
 	reader2, err := os.Open(filename)
 	if err != nil {
-		return
+		log.Println(err)
+		return nil
 	}
-	data := &discordgo.MessageSend{
-		Content: ss[rand.Intn(len(ss))],
-		Files:   []*discordgo.File{&discordgo.File{filename, content, reader2}},
+
+	msgContent := goMsgs[rand.Intn(len(goMsgs))]
+
+	return &discordgo.MessageSend{
+		Content: msgContent,
+		Files:   []*discordgo.File{&discordgo.File{filename, contentType, reader2}},
 	}
-	sess.ChannelMessageSendComplex(sess.ChannelID, data)
-}
-
-func (g *GOISAWESOME) Description() string {
-	return "GO IS AWESOME"
-}
-
-func (g *GOISAWESOME) Types() []stypes.Type {
-	return []stypes.Type{}
 }
