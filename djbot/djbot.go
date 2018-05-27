@@ -32,21 +32,6 @@ func New(config Config) (*DJBot, error) {
 	return dj, nil
 }
 
-func (dj *DJBot) run() {
-	for {
-		select {
-		case msg := <-dj.MsgC:
-			if msg != nil {
-				ch := dj.Config.ChannelID
-				_, err := dj.Discord.ChannelMessageSendComplex(ch, msg)
-				if err != nil {
-					log.Println(err)
-				}
-			}
-		}
-	}
-}
-
 func (dj *DJBot) Open() error {
 	err := dj.Discord.Open()
 	if err != nil {
@@ -61,4 +46,19 @@ func (dj *DJBot) Open() error {
 func (dj *DJBot) Close() {
 	dj.Discord.Close()
 	dj = nil
+}
+
+func (dj *DJBot) run() {
+	for {
+		select {
+		case msg := <-dj.MsgC:
+			if msg != nil {
+				ch := dj.Config.ChannelID
+				_, err := dj.Discord.ChannelMessageSendComplex(ch, msg)
+				if err != nil {
+					log.Println(err)
+				}
+			}
+		}
+	}
 }

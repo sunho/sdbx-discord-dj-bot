@@ -8,14 +8,9 @@ import (
 	"path/filepath"
 
 	"github.com/bwmarrin/discordgo"
-	djbot "github.com/sunho/sdbx-discord-dj-bot"
-	"github.com/sunho/sdbx-discord-dj-bot/stypes"
 )
 
-type GOISAWESOME struct {
-}
-
-const ss = [...]string{
+const goMsgs = [...]string{
 	"Write in Go!",
 	"고가 모든걸 해결합니다",
 	"'GO made me FREE'",
@@ -30,33 +25,33 @@ const ss = [...]string{
 	"구글에서 만들었으니 당연히 갓언어겠죠?",
 }
 
-func (g *GOISAWESOME) Handle(sess *djbot.Session, parms []interface{}) {
-	d := make([]string, 0)
+func GoAction(sess *discordgo.Session, content string) *discordgo.MessageSend {
+	filenames := make([]string, 0)
+
 	filepath.Walk("gophers", func(path string, f os.FileInfo, err error) error {
-		d = append(d, path)
+		filenames = append(filenames, path)
 		return nil
 	})
-	filename := d[rand.Intn(len(d))]
+
+	filename := filenames[rand.Intn(len(filenames))]
+
 	reader, err := ioutil.ReadFile(filename)
 	if err != nil {
-		return
+		return nil
 	}
-	content := http.DetectContentType(reader)
+
+	contentType := http.DetectContentType(reader)
+
 	reader2, err := os.Open(filename)
 	if err != nil {
-		return
+		return nil
 	}
-	data := &discordgo.MessageSend{
+
+	msgContent := goMsgs[ran.Intn(len(goMasgs))]
+
+	msg := &discordgo.MessageSend{
 		Content: ss[rand.Intn(len(ss))],
-		Files:   []*discordgo.File{&discordgo.File{filename, content, reader2}},
+		Files:   []*discordgo.File{&discordgo.File{filename, msgContent, reader2}},
 	}
-	sess.ChannelMessageSendComplex(sess.ChannelID, data)
-}
-
-func (g *GOISAWESOME) Description() string {
-	return "GO IS AWESOME"
-}
-
-func (g *GOISAWESOME) Types() []stypes.Type {
-	return []stypes.Type{}
+	return msg
 }

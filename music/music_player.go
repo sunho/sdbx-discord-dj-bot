@@ -1,19 +1,6 @@
-package commands
+package music
 
-import (
-	"errors"
-	"time"
-)
-
-type Song struct {
-	Requester   string
-	RequesterID string
-	Name        string
-	Duration    time.Duration
-	Type        string
-	Url         string
-	Thumbnail   string
-}
+import "github.com/bwmarrin/discordgo"
 
 type State int
 
@@ -22,44 +9,44 @@ const (
 	Playing
 )
 
-type Control interface {
-	controlSealed()
-}
-
-type ControlAdd struct {
-	Song *Song
-}
-
-func (c *ControlAdd) controlSealed() {}
-
-type ControlSkip struct {
-}
-
-func (c *ControlSkip) controlSealed() {}
-
-type ControlConnect struct {
-}
-
-func (c *ControlConnect) controlSealed() {}
-
-type ControlDisconnet struct {
-}
-
-func (c *ControlDisconnect) controlSealed() {}
-
 type MusicPlayer struct {
-	C            chan MusicControl
-	NP           int
-	State        State
-	Songs        []*Song
-	Disconnected bool
-	Current      *Song
-	
+	C          chan Control
+	State      State
+	Songs      []*Song
+	Current    *Song
+	Connection *discordgo.VoiceConnection
+
+	skipC chan struct{}
 }
 
-func NewMusicPlayer() {
+func NewMusicPlayer() *MusicPlayer {
 	return &MusicPlayer{
-		C: make(chan MusicControl),
-		Songs: []*Song{}
+		C:     make(chan Control),
+		Songs: []*Song{},
+	}
+}
+
+func (mp *MusicPlayer) run() {
+	for {
+		select {
+		case control := <-mp.C:
+			control.Handle(mp)
+		}
+	}
+}
+
+func (mp *MusicPlayer) play() {
+	mp.State = Playing
+	defer func() {
+		mp.State = NotPlaying
+	}()
+
+	for {
+		if len(mp.Songs) == 0 {
+			break
+		}
+
+		mp.C <- ControlNext{}
+
 	}
 }

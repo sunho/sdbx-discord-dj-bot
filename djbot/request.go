@@ -53,11 +53,13 @@ func (rm *RequestManager) run() {
 			rm.requests[r.UserID] = r
 			rm.dj.MsgC <- msgs.RequestListMsg(r.List)
 
+			// timeout
 			go func() {
 				wait := rm.dj.Config.RequestWait
 				time.Sleep(time.Duration(wait) * time.Second)
 				rm.DC <- r
 			}()
+
 		case r := <-rm.DC:
 			for _, re := range rm.requests {
 				if r == re {
