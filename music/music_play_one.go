@@ -16,7 +16,7 @@ type Song struct {
 	Name        string
 	Duration    time.Duration
 	Type        string
-	Url         string
+	URL         string
 	Thumbnail   string
 }
 
