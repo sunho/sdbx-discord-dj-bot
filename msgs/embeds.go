@@ -76,7 +76,7 @@ func SongQueueMsg(songs []provider.Song, members []*discordgo.Member) *discordgo
 
 	for i, song := range songs {
 		mname := getMemberName(members[i])
-		str += fmt.Sprintf("**%d** `%s` `by %s`\n\n", i, song.Name, mname)
+		str += fmt.Sprintf("**%d** `%s` `by %s`\n\n", i-1, song.Name, mname)
 	}
 	embed := &discordgo.MessageEmbed{
 		Title:       consts.SongQueue,

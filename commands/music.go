@@ -87,13 +87,14 @@ func (m *musicCommander) npAction(dj *djbot.DJBot, msg *discordgo.MessageCreate)
 }
 
 func (m *musicCommander) queueAction(dj *djbot.DJBot, msg *discordgo.MessageCreate) *discordgo.MessageSend {
+	current := m.m.Mp.GetCurrent()
 	songs := m.m.Mp.GetSongs()
-	if len(songs) == 0 {
+	if current == nil {
 		return &discordgo.MessageSend{Content: consts.Fail}
 	}
 
-	members := []*discordgo.Member{}
-	songs2 := []provider.Song{}
+	members := []*discordgo.Member{current.Requestor}
+	songs2 := []provider.Song{current.Song}
 
 	for _, song := range songs {
 		songs2 = append(songs2, song.Song)
@@ -136,12 +137,13 @@ func (m *musicCommander) clearAction(dj *djbot.DJBot, msg *discordgo.MessageCrea
 
 func (m *musicCommander) removeAction(dj *djbot.DJBot, msg *discordgo.MessageCreate) *discordgo.MessageSend {
 	index := -1
-	fmt.Sprintf(msg.Content, "%d", &index)
+	fmt.Sscanf(msg.Content, "%d", &index)
 
 	mem, _ := dj.Discord.GuildMember(dj.GuildID, msg.Author.ID)
 
 	err := m.m.RemoveSong(mem, index)
 	if err != nil {
+		log.Println(err)
 		return &discordgo.MessageSend{Content: consts.Fail}
 	}
 
