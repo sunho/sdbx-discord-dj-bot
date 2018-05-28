@@ -42,7 +42,7 @@ func NewMusicPlayer() *MusicPlayer {
 	return &MusicPlayer{
 		Emitter:    &emitter.Emitter{},
 		songs:      []*Song{},
-		bufferSize: 10000000,
+		bufferSize: 100000,
 		skipC:      make(chan struct{}),
 	}
 }
