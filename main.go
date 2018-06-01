@@ -2,9 +2,7 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -25,14 +23,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-	file, err := os.OpenFile("log.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		panic(err)
-	}
-
-	writer := io.MultiWriter(file, os.Stdout)
-	log.SetOutput(writer)
 
 	dj, err := djbot.New(config)
 	if err != nil {
